@@ -1,11 +1,11 @@
-
+import Default from "./layouts/default";
 
 
 function App() {
  return (
-  <div>
-    <h1>Static-Website</h1>
-  </div>
+ (
+  <Default />
+)
  )
 }
 
