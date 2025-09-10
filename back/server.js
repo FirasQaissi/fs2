@@ -8,9 +8,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/study_tracker';
+const MONGODB_URI = process.env.MONGODB_URI 
 const PORT = process.env.PORT || 3000;
-
+console.log('Connecting to:', MONGODB_URI);
 // Routes
 const authRoutes = require('./routes/auth');
 
@@ -24,7 +24,8 @@ async function start() {
 
     // Health
     app.get('/health', (req, res) => {
-      res.json({ ok: true });
+      res.json({ ok: 'Success connecting to MongoDB' });
+      console.log('Health check successful');
     });
 
     // Auth

@@ -1,16 +1,10 @@
 const mongoose = require('mongoose');
 
-const UserProgressSchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    pathId: { type: mongoose.Schema.Types.ObjectId, ref: 'LearningPath', required: true, index: true },
-    completedModules: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Module', default: [] }],
-  },
-  { timestamps: { createdAt: false, updatedAt: 'updatedAt' } }
-);
+const UserProgressSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
+  completed: { type: Boolean, default: false },
+  // תוסיף שדות נוספים אם צריך
+}, { timestamps: true });
 
-UserProgressSchema.index({ userId: 1, pathId: 1 }, { unique: true });
-
-module.exports = mongoose.models.UserProgress || mongoose.model('UserProgress', UserProgressSchema);
-
-
+module.exports = mongoose.models.UserProgressSchema || mongoose.model('UserProgressSchema', UserProgressSchema);

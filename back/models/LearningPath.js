@@ -12,6 +12,6 @@ const LearningPathSchema = new mongoose.Schema(
   { timestamps: { createdAt: 'createdAt', updatedAt: false } }
 );
 
-module.exports = mongoose.models.LearningPath || mongoose.model('LearningPath', LearningPathSchema);
+module.exports = mongoose.model('LearningPath', LearningPathSchema);
 
 

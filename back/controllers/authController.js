@@ -50,6 +50,7 @@ async function register(req, res) {
     }
     const passwordHash = await hashPassword(password);
     const created = await User.create({ name, email: normalizedEmail, passwordHash });
+    console.log('✅ USER CREATED:', created);
     const token = jwt.sign({ userId: created._id }, JWT_SECRET, { expiresIn: '1h' });
     return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email }, token });
   } catch (err) {

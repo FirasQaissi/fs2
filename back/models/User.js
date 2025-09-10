@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema(
   { timestamps: { createdAt: 'createdAt', updatedAt: false } }
 );
 
-module.exports = mongoose.models.User || mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', UserSchema);
+console.log('📦 User model writes to collection:', mongoose.model('User').collection.name);
 
 
