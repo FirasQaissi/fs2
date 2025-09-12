@@ -16,6 +16,8 @@ const UserSchema = new mongoose.Schema(
     enrolledPaths: { type: [EnrolledPathSchema], default: [] },
     isAdmin: { type: Boolean, default: false },
     isBusiness: { type: Boolean, default: false },
+    // Regular user role flag. Always present so we can enforce role checks consistently
+    isUser: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: false } }
 );

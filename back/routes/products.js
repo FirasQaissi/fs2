@@ -7,15 +7,15 @@ const {
   updateProduct,
   deleteProduct
 } = require('../controllers/productController');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 
 // Public routes (no authentication required)
 router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 
-// Protected routes (authentication required)
-router.post('/', authMiddleware, createProduct);
-router.put('/:id', authMiddleware, updateProduct);
-router.delete('/:id', authMiddleware, deleteProduct);
+// Protected routes (authentication + admin role required)
+router.post('/', authMiddleware, requireAdmin, createProduct);
+router.put('/:id', authMiddleware, requireAdmin, updateProduct);
+router.delete('/:id', authMiddleware, requireAdmin, deleteProduct);
 
 module.exports = router;

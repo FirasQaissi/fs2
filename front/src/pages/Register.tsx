@@ -1,62 +1,61 @@
-import { Box, Card, CardContent, Container, Typography, Link } from '@mui/material';
+import { Box, Card, CardContent, Container, Typography, Link, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import RegisterForm from '../components/auth/RegisterForm';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import type { User } from '../types/auth';
 
 export default function Register() {
   const navigate = useNavigate();
+  function getRouteForUser(user: User) {
+    if (user?.isAdmin) return '/admin';
+    if (user?.isBusiness) return '/business';
+    return '/';
+  }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f0f2f6' }}>
       <Navbar />
-      
-      <Container maxWidth="sm" sx={{ py: 8 }}>
-        <Card
-          sx={{
-            borderRadius: '20px',
-            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12)',
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
-              color: 'white',
-              p: 4,
-              textAlign: 'center',
-            }}
-          >
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-              Join Smart Lock Store
-            </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.9 }}>
-              Create your account and start securing your home
-            </Typography>
-          </Box>
-          
-          <CardContent sx={{ p: 4 }}>
-            <RegisterForm onSuccess={() => navigate('/')} />
-            
-            <Box sx={{ textAlign: 'center', mt: 3 }}>
-              <Typography variant="body2" color="text.secondary">
-                Already have an account?{' '}
-                <Link
-                  component={RouterLink}
-                  to="/login"
-                  sx={{
-                    color: '#00d4aa',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
-                  }}
-                >
-                  Sign in here
-                </Link>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Card sx={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.12)' }}>
+          <Grid container>
+            <Grid item xs={12} md={6}
+              sx={{
+                bgcolor: '#efeefe',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                p: { xs: 4, md: 6 },
+                gap: 3,
+                borderRight: { md: '1px solid #e8e8ef' },
+              }}
+            >
+              <Typography variant="h3" fontWeight={800} sx={{ lineHeight: 1.2 }}>
+                Create your account
+                <br />
+                And get started.
               </Typography>
-            </Box>
-          </CardContent>
+              <Box component="img" src="/src/images/Untitled-design-48-1.png" alt="Illustration" sx={{ maxWidth: '420px', width: '100%', borderRadius: 2 }} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ p: { xs: 4, md: 6 } }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                  <Button component={RouterLink} to="/login" variant="outlined" sx={{ borderRadius: '10px' }}>Login</Button>
+                  <Button variant="contained" disableElevation sx={{ borderRadius: '10px', bgcolor: '#6c63ff', '&:hover': { bgcolor: '#5a52f0' } }}>Register</Button>
+                </Box>
+                <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+                  Let's create your account.
+                </Typography>
+                <RegisterForm onSuccess={(u: User) => navigate(getRouteForUser(u))} />
+                <Box sx={{ textAlign: 'center', mt: 3 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Already have an account?{' '}
+                    <Link component={RouterLink} to="/login" sx={{ color: '#6c63ff', fontWeight: 600 }}>Login</Link>
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
         </Card>
       </Container>
     </Box>
