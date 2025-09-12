@@ -5,6 +5,7 @@ export type User = {
 };
 
 export type LoginRequest = {
+  isBusiness: boolean | undefined;
   email: string;
   password: string;
 };
@@ -15,6 +16,7 @@ export type LoginResponse = {
 };
 
 export type RegisterRequest = {
+  isBusiness: boolean | undefined;
   name: string;
   email: string;
   password: string;

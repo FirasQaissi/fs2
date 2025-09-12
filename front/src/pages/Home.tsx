@@ -1,72 +1,117 @@
-import { useMemo } from 'react';
-import { AppBar, Box, Button, Chip, Container, IconButton, Stack, Toolbar, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import MenuIcon from '@mui/icons-material/Menu';
+import { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Container, 
+  Typography,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import { useSearchParams } from 'react-router-dom';
+import ProductCard from '../components/ProductCard';
+import Navbar from '../components/Navbar';
+import { productService } from '../services/productService';
+import type { Product } from '../types/product';
 
 export default function Home() {
-  const featuredTags = useMemo(() => ['javascript', 'react', 'node', 'mongodb'], []);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const fetchedProducts = await productService.getAllProducts();
+        setProducts(fetchedProducts);
+        setFilteredProducts(fetchedProducts);
+      } catch (err) {
+        setError('Failed to load products');
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.descriptions.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.features.some(feature => 
+          feature.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [searchParams, products]);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: (t) => t.palette.background.default }}>
-      <AppBar position="static" color="primary" enableColorOnDark>
-        <Toolbar>
-          <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Study Tracker
-          </Typography>
-          <Button color="inherit" component={RouterLink} to="/login">Login</Button>
-          <Button color="inherit" variant="outlined" sx={{ ml: 1 }} component={RouterLink} to="/register">Sign Up</Button>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
+      <Navbar />
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Stack spacing={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Box>
             <Typography variant="h3" fontWeight={700} gutterBottom>
-              Build your learning journey
+              Smart Lock Products
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Create modular paths, track progress, and learn at your own pace.
+              Discover our latest collection of smart locks with advanced security features.
             </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3 }}>
-              <Button variant="contained" size="large">Explore Paths</Button>
-              <Button variant="outlined" size="large">Create Path</Button>
-            </Stack>
           </Box>
 
-          <Box>
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              Featured tags
-            </Typography>
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-              {featuredTags.map((tag) => (
-                <Chip key={tag} label={tag} variant="outlined" clickable />
-              ))}
-            </Stack>
-          </Box>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-          <Box>
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              How it works
-            </Typography>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-              <Box sx={{ flex: 1, p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle1" fontWeight={700}>1. Create or enroll</Typography>
-                <Typography color="text.secondary">Pick a learning path or design your own.</Typography>
+          {loading ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box>
+              <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+                Our Products
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(3, 1fr)',
+                    lg: 'repeat(4, 1fr)',
+                  },
+                  gap: 3,
+                }}
+              >
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
               </Box>
-              <Box sx={{ flex: 1, p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle1" fontWeight={700}>2. Complete modules</Typography>
-                <Typography color="text.secondary">Watch videos, read articles, and take quizzes.</Typography>
-              </Box>
-              <Box sx={{ flex: 1, p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle1" fontWeight={700}>3. Track progress</Typography>
-                <Typography color="text.secondary">Mark modules complete and visualize progress.</Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </Stack>
+              {filteredProducts.length === 0 && !loading && (
+                <Box textAlign="center" py={4}>
+                  <Typography variant="h6" color="text.secondary">
+                    {searchParams.get('search') 
+                      ? `No products found for "${searchParams.get('search')}"`
+                      : 'No products available at the moment.'
+                    }
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
       </Container>
     </Box>
   );

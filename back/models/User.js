@@ -14,6 +14,8 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
     enrolledPaths: { type: [EnrolledPathSchema], default: [] },
+    isAdmin: { type: Boolean, default: false },
+    isBusiness: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: false } }
 );

@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 console.log('Connecting to:', MONGODB_URI);
 // Routes
 const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/products');
 
 async function start() {
   try {
@@ -24,12 +25,16 @@ async function start() {
 
     // Health
     app.get('/health', (req, res) => {
-      res.json({ ok: 'Success connecting to MongoDB' });
+      res.json({ ok: 'Success connecting to mongoDB' });
       console.log('Health check successful');
     });
 
     // Auth
     app.use('/api/auth', authRoutes);
+    
+    // Products
+    app.use('/api/products', productRoutes);
+    
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

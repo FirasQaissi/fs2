@@ -28,6 +28,7 @@ async function login(req, res) {
       _id: user._id,
       name: user.name,
       email: user.email,
+      isAdmin: user.isAdmin,
     };
 
     return res.json({ user: safeUser, token });
@@ -39,7 +40,7 @@ async function login(req, res) {
 
 async function register(req, res) {
   try {
-    const { name, email, password } = req.body || {};
+    const { name, email, password, isBusiness } = req.body || {};
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' });
     }
@@ -49,10 +50,14 @@ async function register(req, res) {
       return res.status(409).json({ message: 'Email already in use' });
     }
     const passwordHash = await hashPassword(password);
-    const created = await User.create({ name, email: normalizedEmail, passwordHash });
-    console.log('✅ USER CREATED:', created);
+    const created = await User.create({ name, email: normalizedEmail, passwordHash, isBusiness: isBusiness });
+      console.log('✅ USER CREATED:', created);
+    if (isBusiness) {
+      const business = await Business.create({ userId: created._id });
+      console.log('✅ BUSINESS CREATED:', business);
+    }
     const token = jwt.sign({ userId: created._id }, JWT_SECRET, { expiresIn: '1h' });
-    return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email }, token });
+    return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email, isAdmin: created.isAdmin, isBusiness: created.isBusiness   }, token });
   } catch (err) {
     console.error('Register error', err);
     return res.status(500).json({ message: 'Server error' });
@@ -63,7 +68,7 @@ async function me(req, res) {
   try {
     const user = await User.findById(req.user.id).lean();
     if (!user) return res.status(404).json({ message: 'Not found' });
-    return res.json({ user: { _id: user._id, name: user.name, email: user.email } });
+    return res.json({ user: { _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isBusiness: user.isBusiness } });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
   }
