@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const { connectToDatabase } = require('./config/db');
+const { User } = require('./models');
 
 dotenv.config();
 
@@ -20,6 +21,22 @@ async function start() {
     await connectToDatabase(MONGODB_URI);
     console.log('MongoDB connected');
 
+    // Ensure role fields exist on all users (idempotent backfill)
+    try {
+      const [a, b, c] = await Promise.all([
+        User.updateMany({ isAdmin: { $exists: false } }, { $set: { isAdmin: false } }),
+        User.updateMany({ isBusiness: { $exists: false } }, { $set: { isBusiness: false } }),
+        User.updateMany({ isUser: { $exists: false } }, { $set: { isUser: true } }),
+      ]);
+      console.log('Role backfill complete', {
+        isAdminModified: a.modifiedCount,
+        isBusinessModified: b.modifiedCount,
+        isUserModified: c.modifiedCount,
+      });
+    } catch (e) {
+      console.error('Role backfill failed', e);
+    }
+
     // Middleware
     app.use(cors());
 
@@ -34,6 +51,15 @@ async function start() {
     
     // Products
     app.use('/api/products', productRoutes);
+
+    // Admin
+    app.use('/api/admin', require('./routes/admin'));
+    
+    // User profile
+    app.use('/api/user', require('./routes/user'));
+    
+    // Favorites
+    app.use('/api/favorites', require('./routes/favorites'));
     
 
     app.listen(PORT, () => {

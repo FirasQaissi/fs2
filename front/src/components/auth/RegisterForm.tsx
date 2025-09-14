@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Alert, Box, Button, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import { authService } from '../../services/authService';
 import { authStorage } from '../../services/authStorage';
@@ -12,14 +12,38 @@ export default function RegisterForm({ onSuccess }: Props) {
   const [values, setValues] = useState<RegisterRequest>({ name: '', email: '', password : '', isBusiness: false });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const nameError = useMemo(() => {
+    return values.name.length === 0 ? '' : values.name.trim().length < 2 ? 'Enter your full name' : '';
+  }, [values.name]);
+  
+  const emailError = useMemo(() => {
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return values.email.length > 0 && !EMAIL_REGEX.test(values.email) ? 'Enter a valid email' : '';
+  }, [values.email]);
+  
+  const passwordError = useMemo(() => {
+    const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
+    return values.password.length > 0 && !PASSWORD_REGEX.test(values.password)
+      ? 'Min 8 chars, include !@%$#^&*-_'
+      : '';
+  }, [values.password]);
+  
+  const isValid = useMemo(() => {
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
+    return values.name.trim().length >= 2 && EMAIL_REGEX.test(values.email) && PASSWORD_REGEX.test(values.password);
+  }, [values.name, values.email, values.password]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
       const res = await authService.register(values);
-      if (res.token) authStorage.setToken(res.token);
+      if (res.token) {
+        authStorage.setToken(res.token);
+        authStorage.setUser(res.user);
+      }
       onSuccess?.(res.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -46,21 +70,29 @@ export default function RegisterForm({ onSuccess }: Props) {
         <TextField
           label="Full Name"
           value={values.name}
-          onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: RegisterRequest) => ({ ...v, name: e.target.value }))}
+          error={!!nameError}
+          helperText={nameError}
           required
           fullWidth
+          placeholder="Enter your full name"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
               '& fieldset': {
-                borderColor: '#e0e0e0',
+                borderColor: nameError ? '#e53935' : '#e1e5e9',
               },
               '&:hover fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: nameError ? '#e53935' : '#6c63ff',
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: nameError ? '#e53935' : '#6c63ff',
               },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#6b7280',
+              fontWeight: 500,
             },
           }}
         />
@@ -68,21 +100,29 @@ export default function RegisterForm({ onSuccess }: Props) {
           label="Email"
           type="email"
           value={values.email}
-          onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: RegisterRequest) => ({ ...v, email: e.target.value }))}
+          error={!!emailError}
+          helperText={emailError}
           required
           fullWidth
+          placeholder="Example@gmail.com"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
               '& fieldset': {
-                borderColor: '#e0e0e0',
+                borderColor: emailError ? '#e53935' : '#e1e5e9',
               },
               '&:hover fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: emailError ? '#e53935' : '#6c63ff',
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: emailError ? '#e53935' : '#6c63ff',
               },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#6b7280',
+              fontWeight: 500,
             },
           }}
         />
@@ -90,48 +130,71 @@ export default function RegisterForm({ onSuccess }: Props) {
           label="Password"
           type="password"
           value={values.password}
-          onChange={(e) => setValues((v) => ({ ...v, password: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: RegisterRequest) => ({ ...v, password: e.target.value }))}
+          error={!!passwordError}
+          helperText={passwordError}
           required
           fullWidth
+          placeholder="Enter your password"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
               '& fieldset': {
-                borderColor: '#e0e0e0',
+                borderColor: passwordError ? '#e53935' : '#e1e5e9',
               },
               '&:hover fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: passwordError ? '#e53935' : '#6c63ff',
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#00d4aa',
+                borderColor: passwordError ? '#e53935' : '#6c63ff',
               },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#6b7280',
+              fontWeight: 500,
             },
           }}
         />
-          <FormControlLabel
+        <FormControlLabel
           control={
             <Checkbox
               checked={values.isBusiness}
               onChange={(e) => setValues((v) => ({ ...v, isBusiness: e.target.checked }))}
+              sx={{
+                color: '#6c63ff',
+                '&.Mui-checked': {
+                  color: '#6c63ff',
+                },
+              }}
             />
           }
-          label="Business"
+          label="Business Account"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#6b7280',
+              fontSize: '0.875rem',
+            },
+          }}
         />
    
         <Button 
           type="submit" 
           variant="contained" 
-          disabled={submitting}
+          disabled={submitting || !isValid}
+          fullWidth
           sx={{
-            backgroundColor: '#00d4aa',
+            backgroundColor: '#6c63ff',
             color: 'white',
             borderRadius: '12px',
             py: 1.5,
             textTransform: 'none',
             fontSize: '1rem',
             fontWeight: 600,
+            boxShadow: 'none',
             '&:hover': {
-              backgroundColor: '#00b894',
+              backgroundColor: '#5a52f0',
+              boxShadow: 'none',
             },
             '&:disabled': {
               backgroundColor: '#e0e0e0',
@@ -139,7 +202,7 @@ export default function RegisterForm({ onSuccess }: Props) {
             },
           }}
         >
-          {submitting ? 'Creating account…' : 'Create Account'}
+          {submitting ? 'Creating account…' : 'Register'}
         </Button>
       </Stack>
     </Box>

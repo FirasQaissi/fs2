@@ -39,7 +39,7 @@ const stats = [
 export default function About() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
-      <Navbar />
+      <Navbar onLoginClick={() => {}} onRegisterClick={() => {}} />
       
       <Container maxWidth="lg" sx={{ py: 8 }}>
         {/* Hero Section */}

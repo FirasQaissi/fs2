@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   Box,
@@ -12,6 +11,7 @@ import {
   MenuItem,
   Avatar,
   Badge,
+  Select,
   useTheme,
   useMediaQuery,
   Drawer,
@@ -19,7 +19,8 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider
+  Divider,
+  Typography
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -34,12 +35,24 @@ import {
   Info as AboutIcon,
   Login as LoginIcon,
   PersonAdd as SignUpIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
+  Translate as TranslateIcon,
+  Dashboard as DashboardIcon
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { authStorage } from '../services/authStorage';
+import { useSettings } from '../providers/SettingsProvider';
+import { cartService } from '../services/cartService';
 
-export default function Navbar() {
+interface NavbarProps {
+  onLoginClick?: () => void;
+  onRegisterClick?: () => void;
+}
+
+export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = {}) {
+  const { mode, setLanguage, toggleMode, lang } = useSettings();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
@@ -48,10 +61,26 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   
   const isAuthenticated = authStorage.getToken();
-  // Removed call to non-existent getUser method
-  // const user = authStorage.getUser();
+  const user = authStorage.getUser<{ name?: string; isAdmin?: boolean; isBusiness?: boolean }>();
+
+  // Update cart count on component mount and when storage changes
+  useEffect(() => {
+    const updateCartCount = () => setCartCount(cartService.getCartCount());
+    updateCartCount();
+    
+    // Listen for storage changes to update cart count
+    window.addEventListener('storage', updateCartCount);
+    // Listen for custom cart update events
+    window.addEventListener('cartUpdated', updateCartCount);
+    
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('cartUpdated', updateCartCount);
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,17 +122,18 @@ export default function Navbar() {
       open={mobileMenuOpen}
       onClose={handleMobileMenuToggle}
       sx={{
-        '& .MuiDrawer-paper': {
+        '& .MuiDrawer-paper': (theme) => ({
           width: 280,
-          backgroundColor: '#1a1a1a',
-          color: 'white',
-        },
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }),
       }}
     >
       <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
-          Smart Lock Store
-        </Typography>
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+          <Box component="img" src="/src/images/logo4.png" alt="Smart Gate" sx={{ height: 40, width: 'auto' }}  />  smartGate
+        </Box>
+        
         
         {/* Search Bar */}
         <Box component="form" onSubmit={handleSearch} sx={{ mb: 2 }}>
@@ -113,31 +143,23 @@ export default function Navbar() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             size="small"
-            sx={{
+            sx={(theme) => ({
               '& .MuiOutlinedInput-root': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                 borderRadius: '25px',
-                '& fieldset': {
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#00d4aa',
-                },
+                '& fieldset': { borderColor: 'transparent' },
+                '&:hover fieldset': { borderColor: theme.palette.divider },
+                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
               },
               '& .MuiInputBase-input': {
-                color: 'white',
-                '&::placeholder': {
-                  color: 'rgba(255, 255, 255, 0.7)',
-                },
+                color: theme.palette.text.primary,
+                '&::placeholder': { color: theme.palette.text.secondary },
               },
-            }}
+            })}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton type="submit" size="small" sx={{ color: 'white' }}>
+                  <IconButton type="submit" size="small" sx={{ color: 'inherit' }}>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -146,7 +168,7 @@ export default function Navbar() {
           />
         </Box>
 
-        <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', mb: 2 }} />
+        <Divider sx={(theme) => ({ backgroundColor: theme.palette.divider, mb: 2 })} />
 
         {/* Navigation Items */}
         <List>
@@ -159,21 +181,21 @@ export default function Navbar() {
               sx={{
                 borderRadius: '8px',
                 mb: 0.5,
-                backgroundColor: location.pathname === item.path ? 'rgba(0, 212, 170, 0.2)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
+                backgroundColor: (theme) => location.pathname === item.path ? theme.palette.action.selected : 'transparent',
+                '&:hover': (theme) => ({
+                  backgroundColor: theme.palette.action.hover,
+                }),
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.label} sx={{ color: 'white' }} />
+              <ListItemText primary={item.label} sx={{ color: 'inherit' }} />
             </ListItem>
           ))}
         </List>
 
-        <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', my: 2 }} />
+        <Divider sx={(theme) => ({ backgroundColor: theme.palette.divider, my: 2 })} />
 
         {/* User Actions */}
         {isAuthenticated ? (
@@ -185,15 +207,15 @@ export default function Navbar() {
               sx={{
                 borderRadius: '8px',
                 mb: 0.5,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
+                '&:hover': (theme) => ({
+                  backgroundColor: theme.palette.action.hover,
+                }),
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <ShoppingBagIcon />
               </ListItemIcon>
-              <ListItemText primary="My Card" sx={{ color: 'white' }} />
+              <ListItemText primary="My Card" sx={{ color: 'inherit' }} />
             </ListItem>
             <ListItem
               onClick={() => {
@@ -203,51 +225,55 @@ export default function Navbar() {
               sx={{
                 borderRadius: '8px',
                 cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
+                '&:hover': (theme) => ({
+                  backgroundColor: theme.palette.action.hover,
+                }),
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LogoutIcon />
               </ListItemIcon>
-              <ListItemText primary="Sign Out" sx={{ color: 'white' }} />
+              <ListItemText primary="Sign Out" sx={{ color: 'inherit' }} />
             </ListItem>
           </List>
         ) : (
           <List>
             <ListItem
-              component={RouterLink}
-              to="/login"
-              onClick={handleMobileMenuToggle}
+              onClick={() => {
+                onLoginClick?.();
+                handleMobileMenuToggle();
+              }}
               sx={{
                 borderRadius: '8px',
                 mb: 0.5,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
+                cursor: 'pointer',
+                '&:hover': (theme) => ({
+                  backgroundColor: theme.palette.action.hover,
+                }),
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LoginIcon />
               </ListItemIcon>
-              <ListItemText primary="Login" sx={{ color: 'white' }} />
+              <ListItemText primary="Login" sx={{ color: 'inherit' }} />
             </ListItem>
             <ListItem
-              component={RouterLink}
-              to="/register"
-              onClick={handleMobileMenuToggle}
+              onClick={() => {
+                onRegisterClick?.();
+                handleMobileMenuToggle();
+              }}
               sx={{
                 borderRadius: '8px',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
+                cursor: 'pointer',
+                '&:hover': (theme) => ({
+                  backgroundColor: theme.palette.action.hover,
+                }),
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <SignUpIcon />
               </ListItemIcon>
-              <ListItemText primary="Sign Up" sx={{ color: 'white' }} />
+              <ListItemText primary="Sign Up" sx={{ color: 'inherit' }} />
             </ListItem>
           </List>
         )}
@@ -259,28 +285,42 @@ export default function Navbar() {
     <>
       <AppBar 
         position="static" 
-        sx={{ 
-          backgroundColor: '#1a1a1a',
-          boxShadow: '0 2px 20px rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(10px)',
-        }}
+        sx={(theme) => ({ 
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)'
+        })}
       >
         <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
           {/* Logo */}
-          <Typography
-            variant="h6"
+          <Box
             component={RouterLink}
             to="/"
             sx={{
-              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
               textDecoration: 'none',
-              fontWeight: 'bold',
-              fontSize: '1.5rem',
-              letterSpacing: '-0.5px',
+              gap: 1.5,
             }}
           >
-            Smart Lock Store
-          </Typography>
+            <Box component="img" src="/src/images/logo5.png" alt="Smart Gate" sx={{ height: 45, width: 'auto' }} />
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #00d4aa, #00b894)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontFamily: '"Poppins", "Inter", "Roboto", sans-serif',
+                letterSpacing: '0.5px',
+                display: { xs: 'none', sm: 'block' },
+              }}
+            >
+              SmartGate
+            </Typography>
+          </Box>
 
           {/* Desktop Navigation */}
           {!isMobile && (
@@ -293,31 +333,21 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   size="small"
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                       borderRadius: '25px',
-                      '& fieldset': {
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#00d4aa',
-                      },
+                      '& fieldset': { borderColor: 'transparent' }
                     },
                     '& .MuiInputBase-input': {
-                      color: 'white',
-                      '&::placeholder': {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                      },
-                    },
-                  }}
+                      color: theme.palette.text.primary,
+                      '&::placeholder': { color: theme.palette.text.secondary }
+                    }
+                  })}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton type="submit" size="small" sx={{ color: 'white' }}>
+                        <IconButton type="submit" size="small" sx={{ color: 'inherit' }}>
                           <SearchIcon />
                         </IconButton>
                       </InputAdornment>
@@ -334,15 +364,15 @@ export default function Navbar() {
                     component={RouterLink}
                     to={item.path}
                     sx={{
-                      color: 'white',
+                      color: 'inherit',
                       textTransform: 'none',
                       fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                      backgroundColor: location.pathname === item.path ? 'rgba(0, 212, 170, 0.2)' : 'transparent',
+                      backgroundColor: 'transparent',
                       borderRadius: '8px',
                       px: 2,
                       py: 1,
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'action.hover',
                       },
                     }}
                   >
@@ -355,21 +385,59 @@ export default function Navbar() {
 
           {/* Right Side Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Language Switcher - dropdown */}
+            <Box sx={(theme) => ({ display: 'flex', alignItems: 'center', gap: 1, mr: 1, border: `1px solid ${theme.palette.divider}`, borderRadius: '20px', px: 1 })}>
+              <TranslateIcon fontSize="small" sx={{ color: 'inherit' }} />
+              <Select
+                size="small"
+                value={lang}
+                onChange={(e) => setLanguage(e.target.value as 'en' | 'ar' | 'he')}
+                variant="standard"
+                disableUnderline
+                sx={{ minWidth: 72, color: 'inherit' }}
+              >
+                <MenuItem value="en">EN</MenuItem>
+                <MenuItem value="ar">AR</MenuItem>
+                <MenuItem value="he">HE</MenuItem>
+              </Select>
+            </Box>
+
+            {/* Theme Toggle - icon only */}
+            <IconButton onClick={toggleMode} sx={{ color: 'inherit' }} aria-label="toggle theme">
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
             {!isMobile && (
               <>
-                {/* My Card */}
+                {/* Admin Dashboard - only show for admin users */}
+                {user?.isAdmin && (
+                  <IconButton
+                    component={RouterLink}
+                    to="/admin"
+                    sx={{ color: 'inherit' }}
+                    title="Admin Dashboard"
+                  >
+                    <DashboardIcon />
+                  </IconButton>
+                )}
+
+                {/* Shopping Cart */}
                 <IconButton
                   component={RouterLink}
-                  to="/mycard"
-                  sx={{ color: 'white' }}
+                  to="/cart"
+                  sx={{ color: 'inherit' }}
+                  title="Shopping Cart"
                 >
-                  <Badge badgeContent={0} color="error">
+                  <Badge badgeContent={cartCount} color="error">
                     <ShoppingBagIcon />
                   </Badge>
                 </IconButton>
 
                 {/* Favorites */}
-                <IconButton sx={{ color: 'white' }}>
+                <IconButton
+                  component={RouterLink}
+                  to="/favorites"
+                  sx={{ color: 'inherit' }}
+                >
                   <FavoriteIcon />
                 </IconButton>
               </>
@@ -377,45 +445,41 @@ export default function Navbar() {
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <IconButton onClick={handleUserMenuOpen} sx={{ color: 'white' }}>
+              <IconButton onClick={handleUserMenuOpen} sx={{ color: 'inherit' }}>
                 <Avatar sx={{ width: 32, height: 32, bgcolor: '#00d4aa' }}>
-                  {isAuthenticated && typeof isAuthenticated === 'object' && isAuthenticated !== null && (isAuthenticated as { name?: string }).name && typeof (isAuthenticated as { name?: string }).name === 'string'
-                    ? ((isAuthenticated as { name: string }).name.charAt(0).toUpperCase())
-                    : <PersonIcon />}
+                  {user?.name ? user.name.charAt(0).toUpperCase() : <PersonIcon />}
                 </Avatar>
               </IconButton>
             ) : (
               !isMobile && (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Button
-                    component={RouterLink}
-                    to="/login"
+                    onClick={onLoginClick}
                     sx={{
-                      color: 'white',
+                      color: 'inherit',
                       textTransform: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
                       borderRadius: '20px',
                       px: 2,
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        backgroundColor: 'action.hover',
+                        borderColor: 'divider',
                       },
                     }}
                   >
                     Login
                   </Button>
                   <Button
-                    component={RouterLink}
-                    to="/register"
+                    onClick={onRegisterClick}
                     variant="contained"
                     sx={{
-                      backgroundColor: '#00d4aa',
+                      backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#00b894' : '#00d4aa',
                       color: 'white',
                       textTransform: 'none',
                       borderRadius: '20px',
                       px: 2,
                       '&:hover': {
-                        backgroundColor: '#00b894',
+                        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#00a884' : '#00b894',
                       },
                     }}
                   >
@@ -427,7 +491,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Button */}
             {isMobile && (
-              <IconButton onClick={handleMobileMenuToggle} sx={{ color: 'white' }}>
+              <IconButton onClick={handleMobileMenuToggle} sx={{ color: 'inherit' }}>
                 <MenuIcon />
               </IconButton>
             )}
@@ -441,23 +505,28 @@ export default function Navbar() {
         open={Boolean(userMenuAnchor)}
         onClose={handleUserMenuClose}
         sx={{
-          '& .MuiPaper-root': {
-            backgroundColor: '#2a2a2a',
-            color: 'white',
+          '& .MuiPaper-root': (theme) => ({
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
             borderRadius: '12px',
             mt: 1,
-          },
+          }),
         }}
       >
-        <MenuItem onClick={handleUserMenuClose} sx={{ color: 'white' }}>
+        <MenuItem 
+          component={RouterLink}
+          to="/profile"
+          onClick={handleUserMenuClose} 
+          sx={{ color: 'inherit' }}
+        >
           <PersonIcon sx={{ mr: 1 }} />
           Profile
         </MenuItem>
-        <MenuItem onClick={handleUserMenuClose} sx={{ color: 'white' }}>
+        <MenuItem onClick={handleUserMenuClose} sx={{ color: 'inherit' }}>
           <ShoppingBagIcon sx={{ mr: 1 }} />
           My Card
         </MenuItem>
-        <MenuItem onClick={handleSignOut} sx={{ color: 'white' }}>
+        <MenuItem onClick={handleSignOut} sx={{ color: 'inherit' }}>
           <LogoutIcon sx={{ mr: 1 }} />
           Sign Out
         </MenuItem>

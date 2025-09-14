@@ -50,7 +50,7 @@ export default function MyCard() {
   if (!isAuthenticated) {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
-        <Navbar />
+        <Navbar onLoginClick={() => {}} onRegisterClick={() => {}} />
         <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
           <Typography variant="h4" gutterBottom>
             Please sign in to view your cart
@@ -65,7 +65,7 @@ export default function MyCard() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
-      <Navbar />
+      <Navbar onLoginClick={() => {}} onRegisterClick={() => {}} />
       
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" fontWeight={700} gutterBottom sx={{ color: '#1a1a1a', mb: 4 }}>

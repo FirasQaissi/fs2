@@ -16,8 +16,14 @@ const UserSchema = new mongoose.Schema(
     enrolledPaths: { type: [EnrolledPathSchema], default: [] },
     isAdmin: { type: Boolean, default: false },
     isBusiness: { type: Boolean, default: false },
+    // Regular user role flag. Always present so we can enforce role checks consistently
+    isUser: { type: Boolean, default: true },
+    // Favorites system - store product IDs
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: [] }],
+    // Temporary admin privileges
+    tempAdminExpiry: { type: Date, default: null },
   },
-  { timestamps: { createdAt: 'createdAt', updatedAt: false } }
+  { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 );
 
 module.exports = mongoose.model('User', UserSchema);

@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "products": "Products",
+    "features": "Features",
+    "services": "Services",
+    "about": "About Us",
+    "login": "Login",
+    "signup": "Sign Up",
+    "dark": "Dark",
+    "light": "Light",
+    "lang": "Language"
+  },
+  "home": {
+    "headline": "Smart Gate Security Solutions",
+    "sub": "Protect your home with cutting-edge smart lock technology.",
+    "shop": "Shop Smart Locks",
+    "learn": "Learn More",
+    "why": "Why Choose Smart Gate?",
+    "about": "About Smart Gate",
+    "cta": "Ready to Secure Your Home?",
+    "contact": "Contact Us",
+    "shopNow": "Shop Now"
+  },
+  "auth": {
+    "loginTitle": "Let's login to your account.",
+    "registerTitle": "Let's create your account.",
+    "login": "Login",
+    "register": "Register",
+    "remember": "Remember me"
+  }
+}
+
+

@@ -43,7 +43,7 @@ const features = [
 export default function Features() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
-      <Navbar />
+      <Navbar onLoginClick={() => {}} onRegisterClick={() => {}} />
       
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Box sx={{ textAlign: 'center', mb: 6 }}>

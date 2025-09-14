@@ -2,6 +2,12 @@ export type User = {
   _id: string;
   name: string;
   email: string;
+  isAdmin?: boolean;
+  isBusiness?: boolean;
+  isUser?: boolean;
+  createdAt?: string;
+  tempAdminExpiry?: string;
+  favorites?: string[];
 };
 
 export type LoginRequest = {
