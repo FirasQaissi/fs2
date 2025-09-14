@@ -9,7 +9,7 @@ async function getProfile(req, res) {
     const userId = req.user.id;
     
     const user = await User.findById(userId)
-      .select('_id name email isAdmin isBusiness isUser createdAt tempAdminExpiry')
+      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry')
       .lean();
     
     if (!user) {
@@ -26,7 +26,7 @@ async function getProfile(req, res) {
       user.tempAdminExpiry = null;
     }
 
-    return res.json({ user });
+    return res.json({ user: { _id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: !!user.isAdmin, isBusiness: !!user.isBusiness, isUser: user.isUser !== false } });
   } catch (err) {
     console.error('Get profile error', err);
     return res.status(500).json({ message: 'Server error' });
@@ -36,7 +36,7 @@ async function getProfile(req, res) {
 async function updateProfile(req, res) {
   try {
     const userId = req.user.id;
-    const { name, email } = req.body || {};
+    const { name, email, phone } = req.body || {};
     
     const update = {};
     
@@ -64,6 +64,14 @@ async function updateProfile(req, res) {
       update.email = normalizedEmail;
     }
 
+    if (phone && typeof phone === 'string') {
+      const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
+      if (!ISRAELI_PHONE_REGEX.test(phone)) {
+        return res.status(400).json({ message: 'Phone must be a valid Israeli mobile number (05XXXXXXXX)' });
+      }
+      update.phone = phone.trim();
+    }
+
     if (Object.keys(update).length === 0) {
       return res.status(400).json({ message: 'No valid fields to update' });
     }
@@ -72,7 +80,7 @@ async function updateProfile(req, res) {
       userId,
       { $set: update },
       { new: true, runValidators: true }
-    ).select('_id name email isAdmin isBusiness isUser createdAt tempAdminExpiry').lean();
+    ).select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry').lean();
 
     if (!updated) {
       return res.status(404).json({ message: 'User not found' });

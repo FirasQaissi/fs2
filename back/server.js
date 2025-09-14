@@ -23,18 +23,20 @@ async function start() {
 
     // Ensure role fields exist on all users (idempotent backfill)
     try {
-      const [a, b, c] = await Promise.all([
+      const [a, b, c, d] = await Promise.all([
         User.updateMany({ isAdmin: { $exists: false } }, { $set: { isAdmin: false } }),
         User.updateMany({ isBusiness: { $exists: false } }, { $set: { isBusiness: false } }),
         User.updateMany({ isUser: { $exists: false } }, { $set: { isUser: true } }),
+        User.updateMany({ phone: { $exists: false } }, { $set: { phone: '' } }),
       ]);
-      console.log('Role backfill complete', {
+      console.log('Role and phone backfill complete', {
         isAdminModified: a.modifiedCount,
         isBusinessModified: b.modifiedCount,
         isUserModified: c.modifiedCount,
+        phoneModified: d.modifiedCount,
       });
     } catch (e) {
-      console.error('Role backfill failed', e);
+      console.error('Role and phone backfill failed', e);
     }
 
     // Middleware

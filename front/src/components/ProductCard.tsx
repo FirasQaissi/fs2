@@ -18,6 +18,7 @@ import {
   FavoriteBorder as FavoriteBorderIcon,
   ShoppingCart as ShoppingCartIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import type { Product } from '../types/product';
 import { favoritesService } from '../services/favoritesService';
 import { authStorage } from '../services/authStorage';
@@ -28,6 +29,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ 
@@ -71,6 +73,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       setLoading(false);
     }
   };
+
+  const handleCardClick = () => {
+    const productId = product.id || (product as { _id?: string })._id;
+    if (productId) {
+      navigate(`/products/${productId}`);
+    }
+  };
+
   return (
     <>
       <Card
@@ -79,16 +89,21 @@ export default function ProductCard({ product }: ProductCardProps) {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
+          cursor: 'pointer',
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
           },
         }}
+        onClick={handleCardClick}
       >
         {/* Favorite Button */}
         <IconButton
-          onClick={handleFavoriteToggle}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleFavoriteToggle();
+          }}
           disabled={loading}
           sx={{
             position: 'absolute',

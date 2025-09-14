@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
+const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
 
 
 async function login(req, res) {
@@ -33,6 +34,7 @@ async function login(req, res) {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       isAdmin: !!user.isAdmin,
       isBusiness: !!user.isBusiness,
       isUser: user.isUser !== false,
@@ -47,7 +49,7 @@ async function login(req, res) {
 
 async function register(req, res) {
   try {
-    const { name, email, password, isBusiness } = req.body || {};
+    const { name, email, password, phone, isBusiness } = req.body || {};
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' });
     }
@@ -57,16 +59,27 @@ async function register(req, res) {
     if (!PASSWORD_REGEX.test(String(password))) {
       return res.status(400).json({ message: 'Password must be at least 8 characters and include a special character' });
     }
+    if (phone && !ISRAELI_PHONE_REGEX.test(String(phone))) {
+      return res.status(400).json({ message: 'Phone must be a valid Israeli mobile number (05XXXXXXXX)' });
+    }
     const normalizedEmail = String(email).toLowerCase().trim();
+    const normalizedPhone = phone ? String(phone).trim() : '';
     const existing = await User.findOne({ email: normalizedEmail }).lean();
     if (existing) {
       return res.status(409).json({ message: 'Email already in use' });
     }
     const passwordHash = await hashPassword(String(password));
-    const created = await User.create({ name, email: normalizedEmail, passwordHash, isBusiness: !!isBusiness });
-    console.log('✅ USER CREATED:', created);
+    const created = await User.create({ name, email: normalizedEmail, phone: normalizedPhone, passwordHash, isBusiness: !!isBusiness });
+    console.log('✅ USER CREATED:', {
+      _id: created._id,
+      name: created.name,
+      email: created.email,
+      phone: created.phone,
+      isAdmin: created.isAdmin,
+      isBusiness: created.isBusiness
+    });
     const token = jwt.sign({ userId: created._id }, JWT_SECRET, { expiresIn: '1h' });
-    return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email, isAdmin: !!created.isAdmin, isBusiness: !!created.isBusiness, isUser: created.isUser !== false }, token });
+    return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email, phone: created.phone, isAdmin: !!created.isAdmin, isBusiness: !!created.isBusiness, isUser: created.isUser !== false }, token });
   } catch (err) {
     console.error('Register error', err);
     return res.status(500).json({ message: 'Server error' });
@@ -77,7 +90,7 @@ async function me(req, res) {
   try {
     const user = await User.findById(req.user.id).lean();
     if (!user) return res.status(404).json({ message: 'Not found' });
-    return res.json({ user: { _id: user._id, name: user.name, email: user.email, isAdmin: !!user.isAdmin, isBusiness: !!user.isBusiness, isUser: user.isUser !== false } });
+    return res.json({ user: { _id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: !!user.isAdmin, isBusiness: !!user.isBusiness, isUser: user.isUser !== false } });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
   }

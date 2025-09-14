@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    phone: { type: String, required: false, trim: true, default: '' },
     passwordHash: { type: String, required: true },
     enrolledPaths: { type: [EnrolledPathSchema], default: [] },
     isAdmin: { type: Boolean, default: false },

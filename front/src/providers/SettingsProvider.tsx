@@ -47,8 +47,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       mode,
       ...(mode === 'dark' && {
         background: {
-          default: '#121212',
-          paper: '#1e1e1e',
+          default: '#0a0a0f',
+          paper: '#1a1a2e',
         },
         primary: {
           main: '#00d4aa',
@@ -56,11 +56,32 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           dark: '#00b894',
         },
         secondary: {
-          main: '#f48fb1',
+          main: '#7c4dff',
+          light: '#b47cff',
+          dark: '#3f1dcb',
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#b3b3b3',
+          primary: '#e8e8f0',
+          secondary: '#9ca3af',
+        },
+        divider: 'rgba(255, 255, 255, 0.08)',
+        action: {
+          hover: 'rgba(255, 255, 255, 0.04)',
+          selected: 'rgba(255, 255, 255, 0.08)',
+          disabled: 'rgba(255, 255, 255, 0.26)',
+          disabledBackground: 'rgba(255, 255, 255, 0.12)',
+        },
+        grey: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#eeeeee',
+          300: '#e0e0e0',
+          400: '#bdbdbd',
+          500: '#9e9e9e',
+          600: '#757575',
+          700: '#616161',
+          800: '#424242',
+          900: '#212121',
         },
       }),
       ...(mode === 'light' && {
@@ -72,13 +93,57 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       }),
     },
     typography: {
-      fontFamily: '"Poppins", "Inter", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      h1: { fontWeight: 700 },
-      h2: { fontWeight: 700 },
-      h3: { fontWeight: 700 },
-      h4: { fontWeight: 600 },
-      h5: { fontWeight: 600 },
-      h6: { fontWeight: 600 },
+      fontFamily: '"Inter", "Roboto", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif',
+      h1: { 
+        fontWeight: 800,
+        fontSize: '2.5rem',
+        lineHeight: 1.2,
+        letterSpacing: '-0.025em'
+      },
+      h2: { 
+        fontWeight: 700,
+        fontSize: '2rem',
+        lineHeight: 1.3,
+        letterSpacing: '-0.02em'
+      },
+      h3: { 
+        fontWeight: 700,
+        fontSize: '1.75rem',
+        lineHeight: 1.3,
+        letterSpacing: '-0.015em'
+      },
+      h4: { 
+        fontWeight: 600,
+        fontSize: '1.5rem',
+        lineHeight: 1.4,
+        letterSpacing: '-0.01em'
+      },
+      h5: { 
+        fontWeight: 600,
+        fontSize: '1.25rem',
+        lineHeight: 1.4,
+        letterSpacing: '-0.005em'
+      },
+      h6: { 
+        fontWeight: 600,
+        fontSize: '1.125rem',
+        lineHeight: 1.4
+      },
+      body1: {
+        fontSize: '1rem',
+        lineHeight: 1.6,
+        fontWeight: 400,
+      },
+      body2: {
+        fontSize: '0.875rem',
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      button: {
+        fontWeight: 500,
+        textTransform: 'none',
+        letterSpacing: '0.01em'
+      },
     },
     components: {
       MuiCssBaseline: {
@@ -93,51 +158,60 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             height: '100%',
             margin: 0,
             padding: 0,
-            ...(mode === 'dark' && {
-              backgroundColor: '#121212',
-              color: '#ffffff',
-            }),
-            ...(mode === 'light' && {
-              backgroundColor: '#ffffff',
-              color: '#000000',
-            }),
           },
           '#root': {
             height: '100%',
-            ...(mode === 'dark' && {
-              backgroundColor: '#121212',
-              color: '#ffffff',
-            }),
           },
         },
       },
-      MuiPaper: {
+      MuiButton: {
         styleOverrides: {
           root: {
-            ...(mode === 'dark' && {
-              backgroundColor: '#1e1e1e',
-              color: '#ffffff',
-            }),
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 500,
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            },
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            ...(mode === 'dark' && {
-              backgroundColor: '#1e1e1e',
-              color: '#ffffff',
-            }),
+            borderRadius: '12px',
+            boxShadow: mode === 'dark' 
+              ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)' 
+              : '0 4px 20px rgba(0, 0, 0, 0.1)',
+            backgroundImage: mode === 'dark' 
+              ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)'
+              : 'none',
+            border: mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
           },
         },
       },
-      MuiAppBar: {
+      MuiPaper: {
         styleOverrides: {
           root: {
-            ...(mode === 'dark' && {
-              backgroundColor: '#1e1e1e',
-              color: '#ffffff',
-            }),
+            backgroundImage: mode === 'dark' 
+              ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)'
+              : 'none',
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: mode === 'dark' 
+              ? 'linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(10, 10, 15, 0.95) 100%)'
+              : 'none',
+            backdropFilter: 'blur(20px)',
           },
         },
       },

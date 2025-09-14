@@ -3,7 +3,7 @@ const { User } = require('../models');
 async function listUsers(_req, res) {
   try {
     const users = await User.find()
-      .select('_id name email isAdmin isBusiness isUser createdAt tempAdminExpiry')
+      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry')
       .sort({ createdAt: -1 })
       .lean();
     
@@ -55,32 +55,119 @@ async function deleteUser(req, res) {
 async function updateUser(req, res) {
   try {
     const targetId = String(req.params.id);
-    const { name, isAdmin, isBusiness, isUser } = req.body || {};
+    const { name, email, phone, isAdmin, isBusiness, isUser } = req.body || {};
+
+    console.log('📝 Update request received:', {
+      targetId,
+      name, email, phone, isAdmin, isBusiness, isUser,
+      nameType: typeof name,
+      emailType: typeof email,
+      phoneType: typeof phone
+    });
 
     if (targetId === req.user.id && isAdmin === false) {
       return res.status(400).json({ message: 'You cannot remove your own admin role' });
     }
 
     const update = {};
-    if (typeof name === 'string') update.name = name;
+    
+    // Validate and update name
+    if (name !== undefined && name !== null) {
+      const nameStr = String(name).trim();
+      if (nameStr.length > 0) {
+        update.name = nameStr;
+      }
+    }
+    
+    // Validate and update email
+    if (email !== undefined && email !== null) {
+      const emailStr = String(email).trim();
+      if (emailStr.length > 0) {
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!EMAIL_REGEX.test(emailStr)) {
+          return res.status(400).json({ message: 'Invalid email format' });
+        }
+        
+        const normalizedEmail = emailStr.toLowerCase();
+        
+        // Check if email is already in use by another user
+        const existing = await User.findOne({ 
+          email: normalizedEmail,
+          _id: { $ne: targetId }
+        }).lean();
+        
+        if (existing) {
+          return res.status(409).json({ message: 'Email already in use' });
+        }
+        
+        update.email = normalizedEmail;
+      }
+    }
+    
+    // Validate and update phone
+    if (phone !== undefined && phone !== null) {
+      const phoneStr = String(phone).trim();
+      if (phoneStr.length > 0) {
+        // Accept multiple Israeli phone formats
+        const ISRAELI_PHONE_FORMATS = [
+          /^05[0-9]{8}$/,        // 0501234567 (10 digits)
+          /^05[0-9]-[0-9]{7}$/,  // 050-1234567 (with dash)
+          /^05[0-9] [0-9]{7}$/,  // 050 1234567 (with space)
+        ];
+        
+        const isValidPhone = ISRAELI_PHONE_FORMATS.some(regex => regex.test(phoneStr));
+        
+        if (!isValidPhone) {
+          console.log('❌ Phone validation failed:', phoneStr);
+          return res.status(400).json({ message: 'Phone must be a valid Israeli mobile number (format: 05XXXXXXXX)' });
+        }
+        
+        // Normalize phone to standard format (remove spaces and dashes)
+        const normalizedPhone = phoneStr.replace(/[\s-]/g, '');
+        update.phone = normalizedPhone;
+      } else {
+        // Allow empty phone
+        update.phone = '';
+      }
+    }
+    
+    // Update role flags
     if (typeof isAdmin === 'boolean') update.isAdmin = isAdmin;
     if (typeof isBusiness === 'boolean') update.isBusiness = isBusiness;
     if (typeof isUser === 'boolean') update.isUser = isUser;
 
+    console.log('📝 Final update object:', update);
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
     const updated = await User.findByIdAndUpdate(
       targetId,
       { $set: update },
-      { new: true, runValidators: true, fields: '_id name email isAdmin isBusiness isUser createdAt tempAdminExpiry' }
+      { new: true, runValidators: true, fields: '_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry' }
     ).lean();
 
     if (!updated) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    console.log('✅ USER UPDATED:', {
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      phone: updated.phone,
+      isAdmin: updated.isAdmin,
+      isBusiness: updated.isBusiness
+    });
+    console.log('Update payload was:', update);
+
     return res.json(updated);
   } catch (err) {
     console.error('Update user error', err);
-    return res.status(500).json({ message: 'Server error' });
+    console.error('Request body:', req.body);
+    console.error('Target ID:', req.params.id);
+    return res.status(500).json({ message: `Server error: ${err.message}` });
   }
 }
 
@@ -153,7 +240,7 @@ async function assignTempAdminPrivileges(req, res) {
 
 async function createUser(req, res) {
   try {
-    const { name, email, password, isAdmin, isBusiness, isUser } = req.body || {};
+    const { name, email, password, phone, isAdmin, isBusiness, isUser } = req.body || {};
     
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' });
@@ -162,6 +249,7 @@ async function createUser(req, res) {
     const { hashPassword } = require('../utils/hash');
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
+    const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
 
     if (!EMAIL_REGEX.test(String(email))) {
       return res.status(400).json({ message: 'Invalid email format' });
@@ -169,8 +257,12 @@ async function createUser(req, res) {
     if (!PASSWORD_REGEX.test(String(password))) {
       return res.status(400).json({ message: 'Password must be at least 8 characters and include a special character' });
     }
+    if (phone && !ISRAELI_PHONE_REGEX.test(String(phone))) {
+      return res.status(400).json({ message: 'Phone must be a valid Israeli mobile number (05XXXXXXXX)' });
+    }
 
     const normalizedEmail = String(email).toLowerCase().trim();
+    const normalizedPhone = phone ? String(phone).trim() : '';
     const existing = await User.findOne({ email: normalizedEmail }).lean();
     if (existing) {
       return res.status(409).json({ message: 'Email already in use' });
@@ -179,15 +271,25 @@ async function createUser(req, res) {
     const passwordHash = await hashPassword(String(password));
     const created = await User.create({ 
       name, 
-      email: normalizedEmail, 
+      email: normalizedEmail,
+      phone: normalizedPhone, 
       passwordHash, 
       isAdmin: !!isAdmin,
       isBusiness: !!isBusiness,
       isUser: isUser !== false
     });
 
+    console.log('✅ ADMIN CREATED USER:', {
+      _id: created._id,
+      name: created.name,
+      email: created.email,
+      phone: created.phone,
+      isAdmin: created.isAdmin,
+      isBusiness: created.isBusiness
+    });
+
     const user = await User.findById(created._id)
-      .select('_id name email isAdmin isBusiness isUser createdAt tempAdminExpiry')
+      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry')
       .lean();
 
     return res.status(201).json(user);

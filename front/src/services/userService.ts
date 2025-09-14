@@ -8,7 +8,7 @@ export const userService = {
     return http<{ user: User }>(`${USER_BASE}/profile`);
   },
 
-  async updateProfile(data: { name?: string; email?: string }): Promise<{ user: User }> {
+  async updateProfile(data: { name?: string; email?: string; phone?: string }): Promise<{ user: User }> {
     return http<{ user: User }>(`${USER_BASE}/profile`, {
       method: 'PUT',
       body: JSON.stringify(data),

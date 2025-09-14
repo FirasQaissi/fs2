@@ -9,9 +9,13 @@ const {
   assignTempAdminPrivileges,
   createUser
 } = require('../controllers/adminController');
+const { getDashboardStats } = require('../controllers/dashboardController');
 
 // All routes under /api/admin require auth + admin
 router.use(authMiddleware, requireAdmin);
+
+// Dashboard statistics
+router.get('/stats', getDashboardStats);
 
 // Users management
 router.get('/users', listUsers);

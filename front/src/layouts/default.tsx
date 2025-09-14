@@ -8,6 +8,7 @@ import MyCard from "../pages/MyCard";
 import Favorites from "../pages/Favorites";
 import UserProfile from "../pages/UserProfile";
 import Cart from "../pages/Cart";
+import ProductDetail from "../pages/ProductDetail";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import Admin from "../pages/Admin";
 import Business from "../pages/Business";
@@ -27,6 +28,7 @@ export default function Default() {
           </ProtectedRoute>
         } />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/admin" element={
           <ProtectedRoute roles={["admin"]}>
             <Admin />

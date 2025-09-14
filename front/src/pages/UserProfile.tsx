@@ -38,7 +38,7 @@ export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [editData, setEditData] = useState({ name: '', email: '' });
+  const [editData, setEditData] = useState({ name: '', email: '', phone: '' });
   const [passwordDialog, setPasswordDialog] = useState(false);
   const [passwordData, setPasswordData] = useState({ 
     currentPassword: '', 
@@ -64,7 +64,7 @@ export default function UserProfile() {
         setLoading(true);
         const { user } = await userService.getProfile();
         setUser(user);
-        setEditData({ name: user.name, email: user.email });
+        setEditData({ name: user.name, email: user.email, phone: user.phone || '' });
       } catch (err) {
         console.error('Error fetching profile:', err);
         setSnack({ open: true, message: 'Failed to load profile', severity: 'error' });
@@ -252,6 +252,17 @@ export default function UserProfile() {
                   fullWidth
                   variant="outlined"
                   type="email"
+                />
+                <TextField
+                  label="Phone Number"
+                  value={editMode ? editData.phone : (user.phone || 'Not provided')}
+                  onChange={(e) => editMode && setEditData({ ...editData, phone: e.target.value })}
+                  disabled={!editMode}
+                  fullWidth
+                  variant="outlined"
+                  type="tel"
+                  placeholder="05XXXXXXXX"
+                  helperText={editMode ? "Israeli mobile format: 05XXXXXXXX" : ""}
                 />
               </Stack>
             </Box>

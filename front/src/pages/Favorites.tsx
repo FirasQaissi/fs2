@@ -5,24 +5,33 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Grid
+  Grid,
+  IconButton,
+  Snackbar
 } from '@mui/material';
 import { 
-  FavoriteOutlined as FavoriteIcon 
+  FavoriteOutlined as FavoriteIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import AuthModal from '../components/auth/AuthModal';
 import { favoritesService } from '../services/favoritesService';
 import { authStorage } from '../services/authStorage';
+import { useSettings } from '../providers/SettingsProvider';
 import type { Product } from '../types/product';
 
 export default function Favorites() {
+  const { t } = useSettings();
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ 
+    open: false, message: '', severity: 'success' 
+  });
   
   const isAuthenticated = authStorage.isAuthenticated();
 
@@ -57,6 +66,19 @@ export default function Favorites() {
     setAuthModalOpen(false);
   };
 
+  const handleRemoveFromFavorites = async (productId: string) => {
+    try {
+      await favoritesService.removeFromFavorites(productId);
+      setFavorites(prevFavorites => prevFavorites.filter(product => 
+        (product.id || (product as Product & { _id?: string })._id) !== productId
+      ));
+      setSnack({ open: true, message: t('favorites.removedFromFavorites'), severity: 'success' });
+    } catch (err) {
+      setSnack({ open: true, message: t('favorites.failedToUpdate'), severity: 'error' });
+      console.error('Error removing from favorites:', err);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -73,10 +95,10 @@ export default function Favorites() {
           }}>
             <FavoriteIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h4" fontWeight={700} gutterBottom>
-              Login Required
+              {t('favorites.loginRequired')}
             </Typography>
             <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-              Please login to view your favorite products.
+              {t('favorites.loginMessage')}
             </Typography>
           </Box>
         </Container>
@@ -100,10 +122,10 @@ export default function Favorites() {
             <FavoriteIcon sx={{ fontSize: 40, color: 'error.main' }} />
             <Box>
               <Typography variant="h3" fontWeight={700} gutterBottom>
-                My Favorites
+                {t('favorites.title')}
               </Typography>
               <Typography variant="h6" color="text.secondary">
-                Your collection of favorite smart lock products.
+                {t('favorites.subtitle')}
               </Typography>
             </Box>
           </Box>
@@ -121,7 +143,7 @@ export default function Favorites() {
           ) : (
             <Box>
               <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                Favorite Products ({favorites.length})
+                {t('favorites.title')} ({favorites.length})
               </Typography>
               
               {favorites.length === 0 ? (
@@ -135,25 +157,65 @@ export default function Favorites() {
                 }}>
                   <FavoriteIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="h5" fontWeight={600} gutterBottom>
-                    No Favorites Yet
+                    {t('favorites.noFavorites')}
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    Start browsing products and add them to your favorites by clicking the heart icon.
+                    {t('favorites.noFavoritesMessage')}
                   </Typography>
                 </Box>
               ) : (
                 <Grid container spacing={3}>
-                  {favorites.map((product) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-                      <ProductCard product={product} />
-                    </Grid>
-                  ))}
+                  {favorites.map((product) => {
+                    const productId = product.id || (product as Product & { _id?: string })._id;
+                    return (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={productId}>
+                        <Box sx={{ position: 'relative' }}>
+                          <ProductCard product={product} />
+                          <IconButton
+                            onClick={() => handleRemoveFromFavorites(productId!)}
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              left: 8,
+                              bgcolor: 'rgba(244, 67, 54, 0.9)',
+                              color: 'white',
+                              zIndex: 2,
+                              '&:hover': {
+                                bgcolor: 'rgba(244, 67, 54, 1)',
+                              },
+                            }}
+                            title={t('favorites.removeFromFavorites')}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
               )}
             </Box>
           )}
         </Box>
       </Container>
+
+      {/* Snackbar */}
+      <Snackbar 
+        open={snack.open} 
+        autoHideDuration={3000} 
+        onClose={() => setSnack(s => ({ ...s, open: false }))}
+      >
+        <Alert 
+          onClose={() => setSnack(s => ({ ...s, open: false }))} 
+          severity={snack.severity} 
+          variant="filled"
+        >
+          {snack.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Auth Modal */}
       <AuthModal 

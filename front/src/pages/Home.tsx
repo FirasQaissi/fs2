@@ -13,10 +13,17 @@ import {
   Wifi as WifiIcon,
   Lock as LockIcon,
   Support as SupportIcon,
-  Speed as SpeedIcon
+  Speed as SpeedIcon,
+  Face as FaceIcon,
+  Fingerprint as FingerprintIcon,
+  PhoneIphone as PhoneIphoneIcon,
+  Pin as PinIcon,
+  CreditCard as CreditCardIcon,
+  VpnKey as VpnKeyIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useSettings } from '../providers/SettingsProvider';
 
 import AuthModal from '../components/auth/AuthModal';
@@ -164,24 +171,170 @@ export default function Home() {
                 </Button>
               </Box>
             </Box>
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+              {/* Main Product Image */}
               <Box
                 component="img"
-                src="/src/images/1.jpg"
+                src="/src/images/final.png"
                 alt="Smart Lock"
                 sx={{
                   width: '100%',
-                  maxWidth: 500,
+                  maxWidth: 650,
                   height: 'auto',
-                  borderRadius: '20px',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                  transform: { md: 'rotate(2deg)' },
+                  borderRadius: '24px',
+                  boxShadow: '0 25px 80px rgba(0,0,0,0.15)',
                   transition: 'transform 0.3s ease',
                   '&:hover': {
-                    transform: { md: 'rotate(0deg) scale(1.02)' }
-                  }
+                    transform: 'scale(1.02)'
+                  },
+                  imageRendering: 'crisp-edges',
+                  objectFit: 'contain',
+                  filter: 'contrast(1.1) brightness(1.05)',
                 }}
               />
+              
+              {/* Feature Icons - Positioned Next to Image */}
+              <Box sx={{ 
+                position: 'absolute', 
+                left: { xs: '100%', md: '105%' },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: { xs: 'none', lg: 'flex' },
+                flexDirection: 'column',
+                gap: 4,
+                zIndex: 2,
+                ml: 2
+              }}>
+                {[
+                  { 
+                    icon: <FaceIcon />, 
+                    label: 'Face Recognition', 
+                    color: '#667eea',
+                  },
+                  { 
+                    icon: <FingerprintIcon />, 
+                    label: 'Fingerprint', 
+                    color: '#00d4aa',
+                  },
+                  { 
+                    icon: <PhoneIphoneIcon />, 
+                    label: 'Mobile App', 
+                    color: '#7c4dff',
+                  },
+                  { 
+                    icon: <PinIcon />, 
+                    label: 'Security Code', 
+                    color: '#ff6b6b',
+                  },
+                  { 
+                    icon: <CreditCardIcon />, 
+                    label: 'IC Card', 
+                    color: '#4ecdc4',
+                  },
+                  { 
+                    icon: <VpnKeyIcon />, 
+                    label: 'Emergency Key', 
+                    color: '#ffa726',
+                  }
+                ].map((feature, index) => (
+                  <Box
+                    key={feature.label}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      minWidth: 220,
+                      animation: `float 4s ease-in-out infinite ${index * 0.4}s`,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateX(10px) scale(1.1)',
+                      },
+                      '@keyframes float': {
+                        '0%, 100%': { transform: 'translateY(0px)' },
+                        '50%': { transform: 'translateY(-10px)' }
+                      }
+                    }}
+                  >
+                    <Box sx={{ 
+                      color: feature.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontSize: '3.5rem',
+                      filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
+                    }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography 
+                      variant="h6" 
+                      fontWeight={700} 
+                      sx={{ 
+                        color: 'white',
+                        fontSize: '1.1rem',
+                        textShadow: '0 3px 6px rgba(0,0,0,0.5)',
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                      }}
+                    >
+                      {feature.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+            
+            {/* Mobile Feature Icons - Below Image */}
+            <Box sx={{ 
+              display: { xs: 'flex', lg: 'none' },
+              flexDirection: 'column',
+              gap: 2,
+              mt: 4,
+              width: '100%'
+            }}>
+              <Typography variant="h5" fontWeight={700} sx={{ color: 'white', textAlign: 'center', mb: 2 }}>
+                Security Features
+              </Typography>
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 2,
+              }}>
+                {[
+                  { icon: <FaceIcon />, label: 'Face Recognition', color: '#667eea' },
+                  { icon: <FingerprintIcon />, label: 'Fingerprint', color: '#00d4aa' },
+                  { icon: <PhoneIphoneIcon />, label: 'Mobile App', color: '#7c4dff' },
+                  { icon: <PinIcon />, label: 'Security Code', color: '#ff6b6b' },
+                  { icon: <CreditCardIcon />, label: 'IC Card', color: '#4ecdc4' },
+                  { icon: <VpnKeyIcon />, label: 'Emergency Key', color: '#ffa726' }
+                ].map((feature, index) => (
+                  <Box
+                    key={feature.label}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      p: 2,
+                    }}
+                  >
+                    <Box sx={{ 
+                      color: feature.color,
+                      fontSize: '2rem',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                    }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600} 
+                      sx={{ 
+                        color: 'white',
+                        fontSize: '0.9rem',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {feature.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           </Box>
         </Container>
@@ -202,13 +355,13 @@ export default function Home() {
           <Box sx={{ flex: 1 }}>
             <Box
               component="img"
-              src="/src/images/2.jpg"
+              src="/src/images/771.jpg"
               alt="About Smart Gate"
               sx={{
                 width: '100%',
                 height: 'auto',
                 borderRadius: '16px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
               }}
             />
           </Box>
@@ -366,6 +519,9 @@ export default function Home() {
           </Box>
         </Container>
       </Box>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Auth Modal */}
       <AuthModal 

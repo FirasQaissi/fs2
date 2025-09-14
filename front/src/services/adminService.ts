@@ -12,13 +12,14 @@ export const adminService = {
   async deleteUser(id: string): Promise<{ message: string }> {
     return http<{ message: string }>(`${ADMIN_BASE}/users/${id}`, { method: 'DELETE' });
   },
-  async updateUser(id: string, payload: Partial<Pick<AdminUser, 'name' | 'isAdmin' | 'isBusiness' | 'isUser'>>): Promise<AdminUser> {
+  async updateUser(id: string, payload: Partial<Pick<AdminUser, 'name' | 'email' | 'phone' | 'isAdmin' | 'isBusiness' | 'isUser'>>): Promise<AdminUser> {
     return http<AdminUser>(`${ADMIN_BASE}/users/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
   },
   async createUser(data: {
     name: string;
     email: string;
     password: string;
+    phone: string;
     isAdmin?: boolean;
     isBusiness?: boolean;
     isUser?: boolean;

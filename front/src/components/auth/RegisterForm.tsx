@@ -9,7 +9,7 @@ type Props = {
 };
 
 export default function RegisterForm({ onSuccess }: Props) {
-  const [values, setValues] = useState<RegisterRequest>({ name: '', email: '', password : '', isBusiness: false });
+  const [values, setValues] = useState<RegisterRequest>({ name: '', email: '', password : '', phone: '', isBusiness: false });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nameError = useMemo(() => {
@@ -28,11 +28,22 @@ export default function RegisterForm({ onSuccess }: Props) {
       : '';
   }, [values.password]);
   
+  const phoneError = useMemo(() => {
+    const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
+    return values.phone.length > 0 && !ISRAELI_PHONE_REGEX.test(values.phone)
+      ? 'Enter valid Israeli mobile (05XXXXXXXX)'
+      : '';
+  }, [values.phone]);
+  
   const isValid = useMemo(() => {
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
-    return values.name.trim().length >= 2 && EMAIL_REGEX.test(values.email) && PASSWORD_REGEX.test(values.password);
-  }, [values.name, values.email, values.password]);
+    const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
+    return values.name.trim().length >= 2 && 
+           EMAIL_REGEX.test(values.email) && 
+           PASSWORD_REGEX.test(values.password) &&
+           (!values.phone || ISRAELI_PHONE_REGEX.test(values.phone));
+  }, [values.name, values.email, values.password, values.phone]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -148,6 +159,34 @@ export default function RegisterForm({ onSuccess }: Props) {
               },
               '&.Mui-focused fieldset': {
                 borderColor: passwordError ? '#e53935' : '#6c63ff',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#6b7280',
+              fontWeight: 500,
+            },
+          }}
+        />
+        <TextField
+          label="Israeli Mobile Number"
+          type="tel"
+          value={values.phone}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: RegisterRequest) => ({ ...v, phone: e.target.value }))}
+          error={!!phoneError}
+          helperText={phoneError || 'Format: 05XXXXXXXX (Optional)'}
+          fullWidth
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
+              '& fieldset': {
+                borderColor: phoneError ? '#e53935' : '#e1e5e9',
+              },
+              '&:hover fieldset': {
+                borderColor: phoneError ? '#e53935' : '#6c63ff',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: phoneError ? '#e53935' : '#6c63ff',
               },
             },
             '& .MuiInputLabel-root': {

@@ -45,6 +45,7 @@ import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { authStorage } from '../services/authStorage';
 import { useSettings } from '../providers/SettingsProvider';
 import { cartService } from '../services/cartService';
+import AdminSidebar from './AdminSidebar';
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -52,7 +53,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = {}) {
-  const { mode, setLanguage, toggleMode, lang } = useSettings();
+  const { mode, setLanguage, toggleMode, lang, t } = useSettings();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [adminSidebarOpen, setAdminSidebarOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   
   const isAuthenticated = authStorage.getToken();
@@ -109,11 +111,11 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
   };
 
   const navItems = [
-    { label: 'Home', path: '/', icon: <HomeIcon /> },
-    { label: 'Products', path: '/products', icon: <ProductsIcon /> },
-    { label: 'Features', path: '/features', icon: <FeaturesIcon /> },
-    { label: 'Services', path: '/services', icon: <ServicesIcon /> },
-    { label: 'About Us', path: '/about', icon: <AboutIcon /> },
+    { label: t('nav.home'), path: '/', icon: <HomeIcon /> },
+    { label: t('nav.products'), path: '/products', icon: <ProductsIcon /> },
+    { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
+    { label: t('nav.services'), path: '/services', icon: <ServicesIcon /> },
+    { label: t('nav.about'), path: '/about', icon: <AboutIcon /> },
   ];
 
   const MobileMenu = () => (
@@ -139,7 +141,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
         <Box component="form" onSubmit={handleSearch} sx={{ mb: 2 }}>
           <TextField
             fullWidth
-            placeholder="Search products..."
+                  placeholder={t('common.searchProducts')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             size="small"
@@ -197,6 +199,51 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
 
         <Divider sx={(theme) => ({ backgroundColor: theme.palette.divider, my: 2 })} />
 
+        {/* Admin Tools for Mobile */}
+        {user?.isAdmin && (
+          <Box sx={{ px: 2, mb: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ px: 1, mb: 1, display: 'block' }}>
+              ADMIN TOOLS
+            </Typography>
+            <ListItem
+              onClick={() => {
+                setAdminSidebarOpen(true);
+                handleMobileMenuToggle();
+              }}
+              sx={{
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                mb: 1,
+                cursor: 'pointer',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                  transform: 'translateX(4px)',
+                },
+                transition: 'all 0.2s ease-in-out',
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText 
+                primary={
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    Admin Panel
+                  </Typography>
+                }
+                secondary={
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                    Manage users & products
+                  </Typography>
+                }
+              />
+            </ListItem>
+          </Box>
+        )}
+
+        <Divider sx={(theme) => ({ backgroundColor: theme.palette.divider, my: 2 })} />
+
         {/* User Actions */}
         {isAuthenticated ? (
           <List>
@@ -215,7 +262,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <ShoppingBagIcon />
               </ListItemIcon>
-              <ListItemText primary="My Card" sx={{ color: 'inherit' }} />
+              <ListItemText primary={t('nav.myCard')} sx={{ color: 'inherit' }} />
             </ListItem>
             <ListItem
               onClick={() => {
@@ -233,7 +280,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LogoutIcon />
               </ListItemIcon>
-              <ListItemText primary="Sign Out" sx={{ color: 'inherit' }} />
+              <ListItemText primary={t('nav.logout')} sx={{ color: 'inherit' }} />
             </ListItem>
           </List>
         ) : (
@@ -255,7 +302,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LoginIcon />
               </ListItemIcon>
-              <ListItemText primary="Login" sx={{ color: 'inherit' }} />
+              <ListItemText primary={t('nav.login')} sx={{ color: 'inherit' }} />
             </ListItem>
             <ListItem
               onClick={() => {
@@ -273,7 +320,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <SignUpIcon />
               </ListItemIcon>
-              <ListItemText primary="Sign Up" sx={{ color: 'inherit' }} />
+              <ListItemText primary={t('nav.signup')} sx={{ color: 'inherit' }} />
             </ListItem>
           </List>
         )}
@@ -284,12 +331,20 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
   return (
     <>
       <AppBar 
-        position="static" 
+        position="sticky" 
+        elevation={0}
         sx={(theme) => ({ 
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.mode === 'dark' 
+            ? 'rgba(18, 18, 18, 0.95)' 
+            : 'rgba(255, 255, 255, 0.95)',
           color: theme.palette.text.primary,
-          boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)',
-          backdropFilter: 'blur(10px)'
+          boxShadow: theme.palette.mode === 'dark'
+            ? '0 2px 20px rgba(0, 0, 0, 0.3)'
+            : '0 2px 20px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          zIndex: theme.zIndex.appBar,
+          top: 0,
         })}
       >
         <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
@@ -309,11 +364,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               variant="h5"
               sx={{
                 fontWeight: 700,
-                background: 'linear-gradient(45deg, #00d4aa, #00b894)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontFamily: '"Poppins", "Inter", "Roboto", sans-serif',
+                color: 'text.primary',
+                fontFamily: 'inherit',
                 letterSpacing: '0.5px',
                 display: { xs: 'none', sm: 'block' },
               }}
@@ -329,7 +381,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <Box component="form" onSubmit={handleSearch} sx={{ minWidth: 300 }}>
                 <TextField
                   fullWidth
-                  placeholder="Search products..."
+                  placeholder={t('common.searchProducts')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   size="small"
@@ -408,16 +460,60 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
             </IconButton>
             {!isMobile && (
               <>
-                {/* Admin Dashboard - only show for admin users */}
+                {/* Admin Dashboard - Prominent Button for admin users */}
                 {user?.isAdmin && (
-                  <IconButton
-                    component={RouterLink}
-                    to="/admin"
-                    sx={{ color: 'inherit' }}
-                    title="Admin Dashboard"
+                  <Button
+                    onClick={() => setAdminSidebarOpen(true)}
+                    variant="contained"
+                    startIcon={<DashboardIcon />}
+                    sx={{ 
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      borderRadius: '12px',
+                      px: 3,
+                      py: 1,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      position: 'relative',
+                      boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                    title="Admin Management Panel"
                   >
-                    <DashboardIcon />
-                  </IconButton>
+                    Admin Panel
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: -3,
+                        right: -3,
+                        width: 10,
+                        height: 10,
+                        bgcolor: '#00d4aa',
+                        borderRadius: '50%',
+                        border: '2px solid white',
+                        animation: 'pulse 2s infinite',
+                        '@keyframes pulse': {
+                          '0%': {
+                            transform: 'scale(1)',
+                            opacity: 1,
+                          },
+                          '50%': {
+                            transform: 'scale(1.3)',
+                            opacity: 0.7,
+                          },
+                          '100%': {
+                            transform: 'scale(1)',
+                            opacity: 1,
+                          },
+                        },
+                      }}
+                    />
+                  </Button>
                 )}
 
                 {/* Shopping Cart */}
@@ -467,7 +563,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
                       },
                     }}
                   >
-                    Login
+                    {t('nav.login')}
                   </Button>
                   <Button
                     onClick={onRegisterClick}
@@ -483,7 +579,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
                       },
                     }}
                   >
-                    Sign Up
+                    {t('nav.signup')}
                   </Button>
                 </Box>
               )
@@ -520,20 +616,28 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
           sx={{ color: 'inherit' }}
         >
           <PersonIcon sx={{ mr: 1 }} />
-          Profile
+          {t('nav.profile')}
         </MenuItem>
         <MenuItem onClick={handleUserMenuClose} sx={{ color: 'inherit' }}>
           <ShoppingBagIcon sx={{ mr: 1 }} />
-          My Card
+          {t('nav.myCard')}
         </MenuItem>
         <MenuItem onClick={handleSignOut} sx={{ color: 'inherit' }}>
           <LogoutIcon sx={{ mr: 1 }} />
-          Sign Out
+          {t('nav.logout')}
         </MenuItem>
       </Menu>
 
       {/* Mobile Menu */}
       <MobileMenu />
+
+      {/* Admin Sidebar */}
+      {user?.isAdmin && (
+        <AdminSidebar 
+          open={adminSidebarOpen}
+          onClose={() => setAdminSidebarOpen(false)}
+        />
+      )}
     </>
   );
 }
