@@ -133,6 +133,7 @@ export default function Cart() {
 
         <Grid container spacing={4}>
           {/* Cart Items */}
+              {/* Cart Items */}
           < Grid item={true} xs={12} md={8}>
             <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
               <TableContainer>
