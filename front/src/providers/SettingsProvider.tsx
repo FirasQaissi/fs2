@@ -27,11 +27,11 @@ const dictionaries: Record<Language, Translations> = {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>('he');
   const [mode, setMode] = useState<Mode>(() => {
-    // Load theme from localStorage on initial load
+    // Load theme from localStorage on initial load; default to dark
     const saved = localStorage.getItem('theme-mode');
-    return (saved as Mode) || 'light';
+    return (saved as Mode) || 'dark';
   });
 
   // Keep layout stable (no LTR/RTL flipping) as requested
@@ -85,10 +85,28 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         },
       }),
       ...(mode === 'light' && {
+        background: {
+          default: '#ffffff',
+          paper: '#ffffff',
+        },
         primary: {
+          main: '#6c63ff',
+          light: '#9c88ff',
+          dark: '#5a52f0',
+        },
+        secondary: {
           main: '#00d4aa',
           light: '#4de6c7',
           dark: '#00b894',
+        },
+        text: {
+          primary: '#1a1a1a',
+          secondary: '#6b7280',
+        },
+        divider: 'rgba(0, 0, 0, 0.08)',
+        action: {
+          hover: 'rgba(0, 0, 0, 0.04)',
+          selected: 'rgba(0, 0, 0, 0.08)',
         },
       }),
     },

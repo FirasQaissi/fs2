@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { authStorage } from '../../services/authStorage';
 import type { User } from '../../types/auth';
+import type { JSX } from 'react';
 
 type Role = 'admin' | 'business' | 'user';
 

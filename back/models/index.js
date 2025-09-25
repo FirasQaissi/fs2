@@ -3,6 +3,7 @@ module.exports = {
   Module: require('./Module'),
   LearningPath: require('./LearningPath'),
   UserProgress: require('./UserProgress'),
+  Lead: require('./Lead'),
 };
 
 

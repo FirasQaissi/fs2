@@ -16,13 +16,13 @@ export default function LoginForm({ onSuccess }: Props) {
 
   const emailError = useMemo(() => {
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return values.email.length > 0 && !EMAIL_REGEX.test(values.email) ? 'Enter a valid email' : '';
+    return values.email.length > 0 && !EMAIL_REGEX.test(values.email) ? 'הכנס כתובת אימייל תקינה' : '';
   }, [values.email]);
   
   const passwordError = useMemo(() => {
     const PASSWORD_REGEX = /^(?=.*[!@%$#^&*\-_]).{8,}$/;
     return values.password.length > 0 && !PASSWORD_REGEX.test(values.password)
-      ? 'Min 8 chars, include !@%$#^&*-_'
+      ? 'לפחות 8 תווים, כולל !@%$#^&*-_'
       : '';
   }, [values.password]);
   
@@ -66,7 +66,7 @@ export default function LoginForm({ onSuccess }: Props) {
           </Alert>
         )}
         <TextField
-          label="Email"
+          label="אימייל"
           type="email"
           value={values.email}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: LoginRequest) => ({ ...v, email: e.target.value }))}
@@ -74,7 +74,7 @@ export default function LoginForm({ onSuccess }: Props) {
           helperText={emailError}
           required
           fullWidth
-          placeholder="Example@gmail.com"
+          placeholder="example@gmail.com"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
@@ -96,7 +96,7 @@ export default function LoginForm({ onSuccess }: Props) {
           }}
         />
         <TextField
-          label="Password"
+          label="סיסמה"
           type="password"
           value={values.password}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: LoginRequest) => ({ ...v, password: e.target.value }))}
@@ -104,7 +104,7 @@ export default function LoginForm({ onSuccess }: Props) {
           helperText={passwordError}
           required
           fullWidth
-          placeholder="Enter your password"
+          placeholder="הכנס את הסיסמה שלך"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
@@ -138,7 +138,7 @@ export default function LoginForm({ onSuccess }: Props) {
               }}
             />
           }
-          label="Remember me"
+          label="זכור אותי"
           sx={{
             '& .MuiFormControlLabel-label': {
               color: '#6b7280',
@@ -170,7 +170,7 @@ export default function LoginForm({ onSuccess }: Props) {
             },
           }}
         >
-          {submitting ? 'Signing in…' : 'Login'}
+          {submitting ? 'מתחבר...' : 'התחברות'}
         </Button>
       </Stack>
     </Box>

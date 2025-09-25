@@ -3,38 +3,38 @@ import Navbar from '../components/Navbar';
 
 const features = [
   {
-    title: "Advanced Security",
-    description: "Military-grade encryption and biometric authentication for maximum protection.",
+    title: "אבטחה מתקדמת",
+    description: "הצפנה ברמה צבאית ואימות ביומטרי להגנה מקסימלית.",
     image: "/src/images/AllegionShlageOmnia_SatinNickel_Front_DigitsOn_Final_02.png.thumb.1280.1280_394x.webp",
     icon: "🔒"
   },
   {
-    title: "Smart Connectivity",
-    description: "WiFi, Bluetooth, and Zigbee support for seamless integration with your smart home.",
+    title: "קישוריות חכמה",
+    description: "תמיכה ב-WiFi, Bluetooth ו-Zigbee לשילוב חלק עם הבית החכם.",
     image: "/src/images/Hd43ab953807844cf9cabc6346c167e89V.avif",
     icon: "📱"
   },
   {
-    title: "Voice Control",
-    description: "Compatible with Alexa, Google Assistant, and Siri for hands-free operation.",
+    title: "שליטה קולית",
+    description: "תומך ב-Alexa, Google Assistant ו-Siri להפעלה ללא מגע.",
     image: "/src/images/images22.jpeg",
     icon: "🎤"
   },
   {
-    title: "Mobile App",
-    description: "Comprehensive mobile app for remote monitoring and control from anywhere.",
+    title: "אפליקציה לנייד",
+    description: "אפליקציה מקיפה לניטור ושליטה מרחוק מכל מקום.",
     image: "/src/images/imagesddwe.jpeg",
     icon: "📲"
   },
   {
-    title: "Auto-Lock",
-    description: "Intelligent auto-lock feature that secures your door when you leave.",
+    title: "נעילה אוטומטית",
+    description: "נעילה חכמה שמאבטחת את הדלת אוטומטית כשאתם יוצאים.",
     image: "/src/images/s-l1200.jpg",
     icon: "⚡"
   },
   {
-    title: "Guest Access",
-    description: "Temporary access codes for guests with customizable time limits.",
+    title: "גישה לאורחים",
+    description: "קודי גישה זמניים לאורחים עם מגבלות זמן מותאמות.",
     image: "/src/images/smart_lock_web1.jpg",
     icon: "👥"
   }
@@ -42,16 +42,16 @@ const features = [
 
 export default function Features() {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Navbar onLoginClick={() => {}} onRegisterClick={() => {}} />
       
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" fontWeight={700} gutterBottom sx={{ color: '#1a1a1a' }}>
-            Smart Lock Features
+          <Typography variant="h2" fontWeight={700} gutterBottom sx={{ color: 'text.primary' }}>
+            תכונות המנעול החכם
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            Discover the advanced features that make our smart locks the perfect choice for modern homes and businesses.
+            גלו את התכונות המתקדמות שהופכות את המנעולים שלנו לבחירה המושלמת לבתים ולעסקים.
           </Typography>
         </Box>
 
@@ -86,16 +86,16 @@ export default function Features() {
                 image={feature.image}
                 alt={feature.title}
                 sx={{
-                  objectFit: 'cover',
-                  backgroundColor: '#f5f5f5',
+                  objectFit: 'contain',
+                  backgroundColor: 'white',
                 }}
               />
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h4" sx={{ mr: 2 }}>
+                  <Typography variant="h3" sx={{ mr: 2 }}>
                     {feature.icon}
                   </Typography>
-                  <Typography variant="h5" fontWeight={600} sx={{ color: '#1a1a1a' }}>
+                  <Typography variant="h5" fontWeight={600} sx={{ color: 'text.primary' }} fontSize={{ xs: '1.2rem', md: '1.4rem' }} fontFamily='"Inter", "Roboto", sans-serif' align='center'>
                     {feature.title}
                   </Typography>
                 </Box>

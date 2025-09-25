@@ -20,11 +20,12 @@ import {
   ListItemText,
   ListItemIcon,
   Divider,
-  Typography
+  Typography,
+  Paper
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  ShoppingBag as ShoppingBagIcon,
+  ShoppingBasket as ShoppingBasketIcon,
   Favorite as FavoriteIcon,
   Menu as MenuIcon,
   Person as PersonIcon,
@@ -45,6 +46,7 @@ import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { authStorage } from '../services/authStorage';
 import { useSettings } from '../providers/SettingsProvider';
 import { cartService } from '../services/cartService';
+import { productService } from '../services/productService';
 import AdminSidebar from './AdminSidebar';
 
 interface NavbarProps {
@@ -64,6 +66,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [adminSidebarOpen, setAdminSidebarOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [products, setProducts] = useState<{ id: string; name: string; price: number }[]>([]);
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   
   const isAuthenticated = authStorage.getToken();
   const user = authStorage.getUser<{ name?: string; isAdmin?: boolean; isBusiness?: boolean }>();
@@ -84,13 +88,45 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
     };
   }, []);
 
+  // Load products for search
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const productsData = await productService.getAllProducts();
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Failed to load products for search:', error);
+      }
+    };
+    loadProducts();
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setSearchDropdownOpen(false);
     }
   };
+
+  const handleSearchFocus = () => {
+    setSearchDropdownOpen(true);
+  };
+
+  const handleSearchBlur = () => {
+    // Delay to allow clicking on dropdown items
+    setTimeout(() => setSearchDropdownOpen(false), 200);
+  };
+
+  const handleProductSelect = (product: { id: string; name: string; price: number }) => {
+    navigate(`/products/${product.id}`);
+    setSearchQuery('');
+    setSearchDropdownOpen(false);
+  };
+
+  // Get top 5 products for dropdown
+  const topProducts = products.slice(0, 5);
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
@@ -110,11 +146,12 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // RTL order: בית | מוצרים | שירותים | תכונות | אודות
   const navItems = [
     { label: t('nav.home'), path: '/', icon: <HomeIcon /> },
     { label: t('nav.products'), path: '/products', icon: <ProductsIcon /> },
-    { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
     { label: t('nav.services'), path: '/services', icon: <ServicesIcon /> },
+    { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
     { label: t('nav.about'), path: '/about', icon: <AboutIcon /> },
   ];
 
@@ -260,7 +297,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               }}
             >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
-                <ShoppingBagIcon />
+                <ShoppingBasketIcon />
               </ListItemIcon>
               <ListItemText primary={t('nav.myCard')} sx={{ color: 'inherit' }} />
             </ListItem>
@@ -377,39 +414,131 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
           {/* Desktop Navigation */}
           {!isMobile && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              {/* Search Bar */}
-              <Box component="form" onSubmit={handleSearch} sx={{ minWidth: 300 }}>
-                <TextField
-                  fullWidth
-                  placeholder={t('common.searchProducts')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  size="small"
-                  sx={(theme) => ({
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                      borderRadius: '25px',
-                      '& fieldset': { borderColor: 'transparent' }
-                    },
-                    '& .MuiInputBase-input': {
-                      color: theme.palette.text.primary,
-                      '&::placeholder': { color: theme.palette.text.secondary }
-                    }
-                  })}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton type="submit" size="small" sx={{ color: 'inherit' }}>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              {/* Enhanced Search Bar with Dropdown */}
+              <Box sx={{ minWidth: 350, position: 'relative' }}>
+                <Box component="form" onSubmit={handleSearch}>
+                  <TextField
+                    fullWidth
+                    placeholder={t('common.searchProducts')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={handleSearchFocus}
+                    onBlur={handleSearchBlur}
+                    size="medium"
+                    sx={(theme) => ({
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
+                        borderRadius: '30px',
+                        fontSize: '1.1rem',
+                        fontWeight: 500,
+                        height: '50px',
+                        '& fieldset': { 
+                          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                          borderWidth: '2px'
+                        },
+                        '&:hover fieldset': { 
+                          borderColor: theme.palette.mode === 'dark' ? '#00d4aa' : '#6c63ff',
+                          borderWidth: '2px'
+                        },
+                        '&.Mui-focused fieldset': { 
+                          borderColor: theme.palette.mode === 'dark' ? '#00d4aa' : '#6c63ff',
+                          borderWidth: '2px'
+                        },
+                        transition: 'all 0.3s ease'
+                      },
+                      '& .MuiInputBase-input': {
+                        color: theme.palette.text.primary,
+                        fontWeight: 500,
+                        '&::placeholder': { 
+                          color: theme.palette.text.secondary,
+                          fontWeight: 400
+                        }
+                      }
+                    })}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ 
+                            color: 'text.secondary',
+                            fontSize: '1.4rem',
+                            mr: 1
+                          }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton 
+                            type="submit" 
+                            size="medium" 
+                            sx={{ 
+                              color: 'primary.main',
+                              '&:hover': {
+                                backgroundColor: 'primary.main',
+                                color: 'white'
+                              },
+                              transition: 'all 0.3s ease'
+                            }}
+                          >
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+
+                {/* Search Dropdown */}
+                {searchDropdownOpen && topProducts.length > 0 && (
+                  <Paper
+                    sx={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 1000,
+                      mt: 1,
+                      borderRadius: '12px',
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 8px 32px rgba(0, 0, 0, 0.4)'
+                        : '0 8px 32px rgba(0, 0, 0, 0.15)',
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                      maxHeight: 300,
+                      overflow: 'auto'
+                    }}
+                  >
+                    <Box sx={{ p: 1 }}>
+                      <Typography variant="subtitle2" sx={{ p: 2, color: 'text.secondary', fontWeight: 600 }}>
+                        מוצרים מובילים
+                      </Typography>
+                      {topProducts.map((product) => (
+                        <Box
+                          key={product.id}
+                          onClick={() => handleProductSelect(product)}
+                          sx={{
+                            p: 2,
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            '&:hover': {
+                              backgroundColor: 'action.hover'
+                            },
+                            transition: 'background-color 0.2s ease'
+                          }}
+                        >
+                          <Typography variant="body1" fontWeight={500} sx={{ mb: 0.5 }}>
+                            {product.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            ₪{product.price}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Paper>
+                )}
               </Box>
 
               {/* Navigation Links */}
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1 }} dir="rtl">
                 {navItems.map((item) => (
                   <Button
                     key={item.path}
@@ -418,11 +547,13 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
                     sx={{
                       color: 'inherit',
                       textTransform: 'none',
-                      fontWeight: location.pathname === item.path ? 'bold' : 'normal',
+                      fontWeight: location.pathname === item.path ? 700 : 500,
+                      fontSize: '1rem',
+                      letterSpacing: '0.015em',
                       backgroundColor: 'transparent',
                       borderRadius: '8px',
-                      px: 2,
-                      py: 1,
+                      px: 2.5,
+                      py: 1.25,
                       '&:hover': {
                         backgroundColor: 'action.hover',
                       },
@@ -524,7 +655,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
                   title="Shopping Cart"
                 >
                   <Badge badgeContent={cartCount} color="error">
-                    <ShoppingBagIcon />
+                    <ShoppingBasketIcon />
                   </Badge>
                 </IconButton>
 
@@ -619,7 +750,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
           {t('nav.profile')}
         </MenuItem>
         <MenuItem onClick={handleUserMenuClose} sx={{ color: 'inherit' }}>
-          <ShoppingBagIcon sx={{ mr: 1 }} />
+          <ShoppingBasketIcon sx={{ mr: 1 }} />
           {t('nav.myCard')}
         </MenuItem>
         <MenuItem onClick={handleSignOut} sx={{ color: 'inherit' }}>

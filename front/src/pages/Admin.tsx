@@ -30,6 +30,7 @@ import AddIcon from '@mui/icons-material/Add';
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BlockIcon from '@mui/icons-material/Block';
 import Navbar from '../components/Navbar';
 import { adminService, type AdminUser } from '../services/adminService';
 import { productService } from '../services/productService';
@@ -268,6 +269,30 @@ export default function Admin() {
                   setSnack({ open: true, message: 'Temporary admin privileges assigned for 1 month', severity: 'success' });
                 } catch (e: unknown) {
                   setSnack({ open: true, message: (e as Error).message || 'Failed to assign temp admin', severity: 'error' });
+                }
+              }}
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="revoke-permissions"
+              icon={<BlockIcon />}
+              label="Revoke All Permissions"
+              onClick={async () => {
+                if (window.confirm('Are you sure you want to revoke all permissions for this user? This will remove admin and business privileges.')) {
+                  try {
+                    const updated = await adminService.updateUser(id, {
+                      name: row.name,
+                      email: row.email,
+                      phone: row.phone,
+                      isAdmin: false,
+                      isBusiness: false,
+                      isUser: true,
+                    });
+                    setUsers((list) => list.map((u) => (u._id === id ? updated : u)));
+                    setSnack({ open: true, message: 'All permissions revoked successfully', severity: 'success' });
+                  } catch (e: unknown) {
+                    setSnack({ open: true, message: (e as Error).message || 'Failed to revoke permissions', severity: 'error' });
+                  }
                 }
               }}
               showInMenu

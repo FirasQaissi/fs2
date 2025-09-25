@@ -48,10 +48,10 @@ export default function Footer() {
   };
 
   const socialLinks = [
-    { icon: <FacebookIcon />, url: 'https://facebook.com/smartgate', label: 'Facebook' },
-    { icon: <TwitterIcon />, url: 'https://twitter.com/smartgate', label: 'Twitter' },
-    { icon: <InstagramIcon />, url: 'https://instagram.com/smartgate', label: 'Instagram' },
-    { icon: <LinkedInIcon />, url: 'https://linkedin.com/company/smartgate', label: 'LinkedIn' },
+    { icon: <FacebookIcon />, url: 'https://www.facebook.com/profile.php?id=61580187693674', label: 'Facebook' },
+    { icon: <TwitterIcon />, url: 'https://www.facebook.com/profile.php?id=61580187693674', label: 'Twitter' },
+    { icon: <InstagramIcon />, url: 'https://www.instagram.com/qaissifiras/', label: 'Instagram' },
+    { icon: <LinkedInIcon />, url: 'https://www.facebook.com/profile.php?id=61580187693674', label: 'LinkedIn' },
   ];
 
   return (
@@ -97,19 +97,19 @@ export default function Footer() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <EmailIcon sx={{ fontSize: 18, color: '#00d4aa' }} />
                   <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
-                    info@smartgate.co.il
+                    smartgate.service@outlook.com
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <PhoneIcon sx={{ fontSize: 18, color: '#00d4aa' }} />
                   <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
-                    +972-3-123-4567
+                    +972-054-3536044
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <LocationIcon sx={{ fontSize: 18, color: '#00d4aa' }} />
                   <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
-                    Tel Aviv, Israel
+                    Jerusalem, Israel
                   </Typography>
                 </Box>
               </Stack>
@@ -245,10 +245,13 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
+          <Box component="img" src="/src/images/qaissifiras_qr.png" alt="Smart Gate" sx={{ height: 150, width: 'auto' }} />
+       <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
+          ❤️ {t('אתר זה נבנה באהבה ע"פ ')} <br />
             © {new Date().getFullYear()} SmartGate. {t('footer.allRightsReserved')}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
-            {t('footer.madeWith')} ❤️ {t('footer.inIsrael')}
+
+            
           </Typography>
         </Box>
       </Container>

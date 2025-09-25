@@ -62,6 +62,9 @@ async function start() {
     
     // Favorites
     app.use('/api/favorites', require('./routes/favorites'));
+
+    // Leads
+    app.use('/api/leads', require('./routes/leads'));
     
 
     app.listen(PORT, () => {
