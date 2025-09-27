@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Alert, Box, Button, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import { authService } from '../../services/authService';
 import { authStorage } from '../../services/authStorage';
+import ForgotPasswordForm from './ForgotPasswordForm';
 import type { LoginRequest, User } from '../../types/auth';
 
 type Props = {
@@ -13,6 +14,7 @@ export default function LoginForm({ onSuccess }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [remember, setRemember] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const emailError = useMemo(() => {
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -181,7 +183,31 @@ export default function LoginForm({ onSuccess }: Props) {
         >
           {submitting ? 'מתחבר...' : 'התחברות'}
         </Button>
+
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Button
+            variant="text"
+            onClick={() => setForgotPasswordOpen(true)}
+            sx={{
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              color: '#6c63ff',
+              fontWeight: 500,
+              '&:hover': {
+                backgroundColor: 'transparent',
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            שכחת סיסמה?
+          </Button>
+        </Box>
       </Stack>
+
+      <ForgotPasswordForm
+        open={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+      />
     </Box>
   );
 }

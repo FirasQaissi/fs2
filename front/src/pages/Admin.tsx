@@ -15,6 +15,7 @@ import {
   Alert,
   Card,
   CardContent,
+  useTheme,
 } from '@mui/material';
 import { 
   DataGrid, 
@@ -32,6 +33,10 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BlockIcon from '@mui/icons-material/Block';
 import SearchIcon from '@mui/icons-material/Search';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import Navbar from '../components/Navbar';
 import SecureDeleteDialog from '../components/SecureDeleteDialog';
 import { adminService, type AdminUser } from '../services/adminService';
@@ -41,12 +46,13 @@ import type { Product, ProductCreateRequest } from '../types/product';
 type TabKey = 'users' | 'products';
 
 export default function Admin() {
+  const theme = useTheme();
   const [tab, setTab] = useState<TabKey>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'success' });
 
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -517,14 +523,195 @@ export default function Admin() {
         }}
       >
         <Container maxWidth="xl">
+          {/* Enhanced Dashboard Header */}
+          <Paper
+            elevation={8}
+            sx={{
+              p: { xs: 3, md: 5 },
+              mb: 4,
+              borderRadius: '24px',
+              background: `linear-gradient(135deg, 
+                ${theme.palette.primary.main} 0%, 
+                ${theme.palette.secondary.main} 100%)`,
+              color: 'white',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+                animation: 'float 20s ease-in-out infinite',
+              },
+              '@keyframes float': {
+                '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                '33%': { transform: 'translateY(-10px) rotate(120deg)' },
+                '66%': { transform: 'translateY(5px) rotate(240deg)' },
+              },
+            }}
+          >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ position: 'relative', zIndex: 1 }}>
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backdropFilter: 'blur(10px)',
+                      animation: 'pulse 2s ease-in-out infinite',
+                      '@keyframes pulse': {
+                        '0%, 100%': { transform: 'scale(1)' },
+                        '50%': { transform: 'scale(1.05)' },
+                      },
+                    }}
+                  >
+                    <DashboardIcon sx={{ fontSize: 32, color: 'white' }} />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h2" 
+                      sx={{
+                        fontWeight: 900,
+                        fontSize: { xs: '2rem', md: '3rem' },
+                        lineHeight: 1.1,
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      Admin Dashboard
+                    </Typography>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        opacity: 0.95,
+                        fontWeight: 500,
+                        fontSize: '1.2rem',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      }}
+                    >
+                      Comprehensive system management & analytics
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                {/* Quick Stats Row */}
+                <Stack 
+                  direction={{ xs: 'column', sm: 'row' }} 
+                  spacing={3} 
+                  sx={{ mt: 3 }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      px: 2.5,
+                      py: 1.5,
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
+                    <PeopleIcon sx={{ fontSize: 24 }} />
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                        {users.length}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        Total Users
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      px: 2.5,
+                      py: 1.5,
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
+                    <InventoryIcon sx={{ fontSize: 24 }} />
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                        {products.length}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        Products
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      px: 2.5,
+                      py: 1.5,
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
+                    <RadioButtonCheckedIcon sx={{ fontSize: 24 }} />
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                        {users.filter(u => u.isOnline).length}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        Online Now
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Stack>
+              </Box>
+
+              {/* Action Button */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    borderRadius: '16px',
+                    px: 4,
+                    py: 2,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.3s ease-in-out',
+                  }}
+                >
+                  View Analytics
+                </Button>
+              </Box>
+            </Stack>
+          </Paper>
+
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
             <Box>
-              <Typography variant="h2" fontWeight={800} gutterBottom>
-                Admin Dashboard
-              </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                Manage users, products, and system settings
-              </Typography>
             </Box>
             <Chip 
               color="primary" 
@@ -1281,7 +1468,7 @@ export default function Admin() {
                     }
                   }}
                   onProcessRowUpdateError={(error) => {
-                    setSnack({ open: true, message: 'Failed to update product', severity: 'error' });
+                    setSnack({ open: true, message: error?.message || 'Failed to update product', severity: 'error' });
                   }}
                 />
               </Paper>

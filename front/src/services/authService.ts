@@ -21,6 +21,18 @@ export const authService = {
       method: 'POST',
     });
   },
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    return http<{ success: boolean; message: string }>(`${AUTH_BASE}/forgot-password`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    return http<{ success: boolean; message: string }>(`${AUTH_BASE}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    });
+  },
 };
 
 

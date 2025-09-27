@@ -28,6 +28,7 @@ import Footer from '../components/Footer';
 import AuthModal from '../components/auth/AuthModal';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [contactForm, setContactForm] = useState({
@@ -37,7 +38,6 @@ export default function Home() {
   });
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactError, setContactError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   // Validation logic similar to Register/Login forms
   const nameError = useMemo(() => {
@@ -213,13 +213,13 @@ const features = [
         {/* Product Images Circle Collage */}
         <Box
           sx={{
-            position: 'absolute',
-            top: '8%',
-            left: '3%',
-            width: '280px', // Increased to accommodate larger circle
-            height: '280px', // Increased to accommodate larger circle
+            position: 'fixed',
+            top: '30%',
+            right: '87%', // Moved to right side away from text
+            width: '150px', // Increased container size
+            height: '150px', // Increased container size
             zIndex: 1,
-            display: { xs: 'none', md: 'block' },
+            display: { xs: 'none', lg: 'block' }, // Only show on large screens
           }}
         >
           {/* Main product images circle */}
@@ -228,7 +228,7 @@ const features = [
               position: 'relative',
               width: '100%',
               height: '100%',
-              animation: 'rotate 20s linear infinite',
+              animation: "",
               '@keyframes rotate': {
                 '0%': { transform: 'rotate(0deg)' },
                 '100%': { transform: 'rotate(360deg)' }
@@ -236,21 +236,25 @@ const features = [
             }}
           >
             {[
-              '/src/images/93098556593.png',
-              '/src/images/661.jpg',
-              '/src/images/771.jpg',
-              '/src/images/s-l1200.jpg',
-              '/src/images/smart_lock_web1.jpg',
-              '/src/images/final.png',
-              '/src/images/1.jpg',
-              '/src/images/2.jpg',
-              '/src/images/3.jpg',
-              '/src/images/AllegionShlageOmnia_SatinNickel_Front_DigitsOn_Final_02.png.thumb.1280.1280_394x.webp',
-              '/src/images/Hd43ab953807844cf9cabc6346c167e89V.avif',
-              '/src/images/Untitled-design-48-1.png'
+              '/src/images/productsImages/AllegionShlageOmnia_SatinNickel_Front_DigitsOn_Final_02.png.thumb.1280.1280_394x.webp',
+
+              '/src/images/productsImages/images22-removebg-preview.png',
+              
+              '/src/images/productsImages/s-l1200-removebg-preview.png  ',
+
+
+              '/src/images/productsImages/smart_lock_web1-removebg-preview.png',
+
+              '/src/images/productsImages/Untitled-design-48-1-removebg-preview.png',
+
+              '/src/images/productsImages/65.png',
+
+              '/src/images/productsImages/Ruveno-Slim-Smart-Fingerprint-Door-Lock-eeb25cc-removebg-preview.png', 
+
+              '/src/images/productsImages/64.png'
             ].map((imgSrc, index) => {
-              const angle = (index * 30) * (Math.PI / 180); // 30 degrees apart for 12 images
-              const radius = 90; // Increased radius for larger circle
+              const angle = (index * 42) * (Math.PI / 220); // 40 degrees apart for 9 images
+              const radius = 130; // Increased radius for bigger circle
               const x = Math.cos(angle) * radius;
               const y = Math.sin(angle) * radius;
               
@@ -260,34 +264,37 @@ const features = [
                   component="img"
                   src={imgSrc}
                   alt={`Product ${index + 1}`}
+                  onClick={() => navigate('/products')}
                   sx={{
                     position: 'absolute',
-                    width: 70, // Increased from 50px
-                    height: 70, // Increased from 50px
+                    width:100, // Increased size
+                    height: 100, // Increased size
                     borderRadius: '50%',
-                    border: '3px solid',
-                    borderColor: 'primary.main',
+                    border: '1px solid',
+                    borderColor: 'silver',
                     objectFit: 'cover',
-                    left: `calc(50% + ${x}px - 35px)`, // Adjusted for new size
-                    top: `calc(50% + ${y}px - 35px)`, // Adjusted for new size
+                    left: `calc(50% + ${x}px - 42.5px)`, // Adjusted for new size
+                    top: `calc(79% + ${y}px - 42.5px)`, // Adjusted for new size
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease-in-out',
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-                    animation: `float${index} 3s ease-in-out infinite`,
-                    animationDelay: `${index * 0.3}s`, // Faster staggered animation
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: '0 6px 20px rgba(84, 84, 94, 0.72)',
+                    animation: `float${index} 4s ease-in-out infinite`,
+                    animationDelay: `${index * 0.4}s`,
                     '&:hover': {
-                      transform: 'scale(1.5)', // Increased hover scale
-                      zIndex: 10,
-                      boxShadow: '0 12px 35px rgba(0, 212, 170, 0.5)',
-                      borderColor: 'secondary.main',
-                      borderWidth: '4px',
+                        
+                      transform: 'translateY(-30px)',
+                      zIndex: 20,
+                      boxShadow: '0 20px 50px rgba(43, 95, 53, 0.34)',
+                      borderColor: 'black',
+                      borderWidth: '2px',
+                      animationPlayState: 'paused', // Pause floating on hover
                     },
                     [`@keyframes float${index}`]: {
                       '0%, 100%': {
                         transform: 'translateY(0px) rotate(0deg)',
                       },
                       '50%': {
-                        transform: `translateY(-${8 + index * 1.5}px) rotate(${index % 2 === 0 ? 3 : -3}deg)`,
+                        transform: `translateY(-${10 + index * 2}px) rotate(${index % 2 === 0 ? 5 : -5}deg)`,
                       },
                     },
                   }}
@@ -299,17 +306,17 @@ const features = [
             <Box
               sx={{
                 position: 'absolute',
-                top: '50%',
+                top: '65%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 60,
-                height: 60,
+                width: 80,
+                height: 80,
                 borderRadius: '50%',
                 bgcolor: 'primary.main',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 6px 20px rgba(0, 212, 170, 0.3)',
+                boxShadow: '0 6px 20px rgba(39, 232, 13, 0.25)',
                 animation: 'centerPulse 2s ease-in-out infinite',
                 '@keyframes centerPulse': {
                   '0%, 100%': {

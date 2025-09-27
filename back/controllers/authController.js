@@ -1,6 +1,9 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { hashPassword, comparePassword } = require('../utils/hash');
+const logger = require('../utils/logger');
+const emailService = require('../utils/emailService');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,7 +37,10 @@ async function login(req, res) {
       isOnline: true
     });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    // Log user login
+    logger.userLogin(user._id, user.email, req.ip);
+
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '5m' });
 
     const safeUser = {
       _id: user._id,
@@ -109,6 +115,12 @@ async function logout(req, res) {
       await User.findByIdAndUpdate(req.user.id, {
         isOnline: false
       });
+      
+      // Log user logout
+      const user = await User.findById(req.user.id).select('email').lean();
+      if (user) {
+        logger.userLogout(req.user.id, user.email);
+      }
     }
     // For stateless JWT, logout is handled client-side by discarding the token
     return res.json({ ok: true });
@@ -142,6 +154,125 @@ async function verifyPassword(req, res) {
   }
 }
 
-module.exports = { login, register, me, logout, verifyPassword };
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body || {};
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    if (!EMAIL_REGEX.test(String(email))) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean();
+    
+    // Always return success to prevent email enumeration attacks
+    if (!user) {
+      return res.json({ 
+        success: true, 
+        message: 'If an account with that email exists, a password reset link has been sent.' 
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Update user with reset token
+    await User.findByIdAndUpdate(user._id, {
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: resetExpires
+    });
+
+    // Send reset email
+    try {
+      await emailService.sendPasswordResetEmail(user.email, resetToken, user.name);
+      
+      // Log password reset request
+      logger.securityEvent('PASSWORD_RESET_REQUESTED', user._id, {
+        email: user.email,
+        ip: req.ip
+      });
+
+      return res.json({ 
+        success: true, 
+        message: 'If an account with that email exists, a password reset link has been sent.' 
+      });
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+      
+      // Clear the reset token if email failed
+      await User.findByIdAndUpdate(user._id, {
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      });
+
+      return res.status(500).json({ 
+        message: 'Failed to send password reset email. Please try again later.' 
+      });
+    }
+
+  } catch (err) {
+    console.error('Forgot password error', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body || {};
+    
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    if (!PASSWORD_REGEX.test(String(newPassword))) {
+      return res.status(400).json({ 
+        message: 'Password must be at least 8 characters and include a special character' 
+      });
+    }
+
+    // Find user with valid reset token
+    const user = await User.findOne({
+      resetPasswordToken: String(token),
+      resetPasswordExpires: { $gt: new Date() }
+    }).lean();
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired reset token' 
+      });
+    }
+
+    // Hash new password
+    const passwordHash = await hashPassword(String(newPassword));
+
+    // Update user password and clear reset token
+    await User.findByIdAndUpdate(user._id, {
+      passwordHash,
+      resetPasswordToken: null,
+      resetPasswordExpires: null
+    });
+
+    // Log password reset completion
+    logger.securityEvent('PASSWORD_RESET_COMPLETED', user._id, {
+      email: user.email,
+      ip: req.ip
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Password has been reset successfully' 
+    });
+
+  } catch (err) {
+    console.error('Reset password error', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+module.exports = { login, register, me, logout, verifyPassword, forgotPassword, resetPassword };
 
 

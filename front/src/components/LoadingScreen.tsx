@@ -25,15 +25,19 @@ export default function LoadingScreen() {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'white',
+        backgroundColor: 'black',
         display: 'flex',
+        borderRadius: '100px solid #white',
+        border: '10px solid #000',
+        boxShadow: '0 20px 60px rgba(14, 211, 66, 0.56)',
+        padding: '10px',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999,
+        zIndex: 100,
         animation: 'fadeOut 0.5s ease-in-out 2.5s forwards',
         '@keyframes fadeOut': {
           '0%': { opacity: 1 },
-          '100%': { opacity: 0, visibility: 'hidden' }
+          '100%': { opacity:0, visibility: 'hidden' }
         }
       }}
     >
@@ -41,12 +45,15 @@ export default function LoadingScreen() {
         component="img"
         src="/src/images/sec (1).gif"
         alt="Loading..."
+        
         sx={{
           width: 'auto',
           height: 'auto',
           maxWidth: isMobile ? '90vw' : '800px',
           maxHeight: isMobile ? '90vh' : '800px',
           backgroundColor: 'transparent',
+          borderRadius: '100px solid white',
+          boxShadow: '0 20px 60px rgba(17, 166, 57, 0.97)',
           animation: 'smoothPulse 2s ease-in-out infinite',
           '@keyframes smoothPulse': {
             '0%, 100%': {

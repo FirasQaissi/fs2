@@ -66,6 +66,9 @@ async function start() {
     // Leads
     app.use('/api/leads', require('./routes/leads'));
     
+    // Customer Messages
+    app.use('/api/customer-messages', require('./routes/customerMessages'));
+    
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

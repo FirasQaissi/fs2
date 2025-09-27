@@ -12,6 +12,9 @@ import ProductDetail from "../pages/ProductDetail";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import Admin from "../pages/Admin";
 import Business from "../pages/Business";
+import Contact from "../pages/Contact";
+import ComingSoon from "../pages/ComingSoon";
+import ResetPassword from "../pages/ResetPassword";
 
 import { Routes } from "react-router-dom";
 
@@ -42,6 +45,13 @@ export default function Default() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/support" element={<ComingSoon />} />
+        <Route path="/privacy" element={<ComingSoon />} />
+        <Route path="/terms" element={<ComingSoon />} />
+        <Route path="/warranty" element={<ComingSoon />} />
+        <Route path="/returns" element={<ComingSoon />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     )
 }

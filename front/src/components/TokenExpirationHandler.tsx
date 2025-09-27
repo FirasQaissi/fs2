@@ -44,8 +44,8 @@ export default function TokenExpirationHandler({ children }: TokenExpirationHand
 
   const handleContinue = () => {
     setShowExpiredDialog(false);
-    authStorage.clear();
-    // Stay on current page but user will be logged out
+    // Stay on current page - user can continue browsing public pages
+    // They will be redirected to login only when trying to access protected routes
   };
 
   const handleLogout = async () => {
@@ -76,7 +76,7 @@ export default function TokenExpirationHandler({ children }: TokenExpirationHand
             borderRadius: '20px',
             border: '2px solid',
             borderColor: 'warning.main',
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.95) 100%)',
+            background: 'linear-gradient(135deg, rgba(18, 17, 17, 0.9) 0%, rgba(52, 46, 46, 0.95) 100%)',
             backdropFilter: 'blur(10px)',
           }
         }}
@@ -129,12 +129,13 @@ export default function TokenExpirationHandler({ children }: TokenExpirationHand
           
           <Typography 
             variant="body2" 
-            color="text.secondary"
             sx={{ 
               fontSize: '1rem',
               lineHeight: 1.6,
               maxWidth: '400px',
-              mx: 'auto'
+              mx: 'auto',
+              color: 'text.primary',
+              opacity: 0.8
             }}
           >
             You can continue browsing as a guest or return to the login page to sign in again.

@@ -4,6 +4,7 @@ module.exports = {
   LearningPath: require('./LearningPath'),
   UserProgress: require('./UserProgress'),
   Lead: require('./Lead'),
+  CustomerMessage: require('./CustomerMessage'),
 };
 
 

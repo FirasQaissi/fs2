@@ -26,6 +26,7 @@ import {
   ViewModule as CardViewIcon,
   TableRows as TableViewIcon,
   FavoriteBorder as FavoriteBorderIcon,
+  Favorite as FavoriteIcon,
   ShoppingCart as ShoppingCartIcon
 } from '@mui/icons-material';
 import { useSearchParams } from 'react-router-dom';
@@ -50,6 +51,8 @@ export default function Products() {
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [searchParams] = useSearchParams();
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favoritesLoading, setFavoritesLoading] = useState<Set<string>>(new Set());
   
   const isAuthenticated = authStorage.isAuthenticated();
 
@@ -60,6 +63,25 @@ export default function Products() {
         const fetchedProducts = await productService.getAllProducts();
         setProducts(fetchedProducts);
         setFilteredProducts(fetchedProducts);
+        
+        // Load favorites if user is authenticated
+        if (isAuthenticated) {
+          try {
+            const favoriteProducts = new Set<string>();
+            for (const product of fetchedProducts) {
+              const productId = product.id || product._id;
+              if (productId) {
+                const { isFavorite } = await favoritesService.isFavorite(productId);
+                if (isFavorite) {
+                  favoriteProducts.add(productId);
+                }
+              }
+            }
+            setFavorites(favoriteProducts);
+          } catch (error) {
+            console.error('Failed to load favorites:', error);
+          }
+        }
       } catch (err) {
         setError('Failed to load products');
         console.error('Error fetching products:', err);
@@ -69,7 +91,7 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const searchQuery = searchParams.get('search');
@@ -96,20 +118,40 @@ export default function Products() {
     setAuthModalOpen(false);
   };
 
-  const handleFavoriteToggle = async (productId: string, currentState: boolean) => {
+  const handleFavoriteToggle = async (productId: string) => {
     if (!isAuthenticated) {
       openAuthModal('login');
       return;
     }
 
+    if (favoritesLoading.has(productId)) {
+      return; // Prevent multiple simultaneous requests
+    }
+
+    setFavoritesLoading(prev => new Set(prev).add(productId));
+
     try {
-      if (currentState) {
+      const isFavorite = favorites.has(productId);
+      
+      if (isFavorite) {
         await favoritesService.removeFromFavorites(productId);
+        setFavorites(prev => {
+          const newFavorites = new Set(prev);
+          newFavorites.delete(productId);
+          return newFavorites;
+        });
       } else {
         await favoritesService.addToFavorites(productId);
+        setFavorites(prev => new Set(prev).add(productId));
       }
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
+    } finally {
+      setFavoritesLoading(prev => {
+        const newLoading = new Set(prev);
+        newLoading.delete(productId);
+        return newLoading;
+      });
     }
   };
 
@@ -434,16 +476,28 @@ export default function Products() {
                                       size="small"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleFavoriteToggle(product.id || product._id || '', false);
+                                        const productId = product.id || product._id;
+                                        if (productId) {
+                                          handleFavoriteToggle(productId);
+                                        }
                                       }}
+                                      disabled={favoritesLoading.has(product.id || product._id || '')}
                                       sx={{
+                                        color: favorites.has(product.id || product._id || '') ? 'error.main' : 'text.secondary',
                                         '&:hover': {
                                           bgcolor: 'error.main',
                                           color: 'white',
                                         },
+                                        '&:disabled': {
+                                          opacity: 0.6,
+                                        },
                                       }}
                                     >
-                                      <FavoriteBorderIcon />
+                                      {favorites.has(product.id || product._id || '') ? (
+                                        <FavoriteIcon />
+                                      ) : (
+                                        <FavoriteBorderIcon />
+                                      )}
                                     </IconButton>
                                     <IconButton
                                       size="small"
