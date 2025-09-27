@@ -8,6 +8,7 @@ async function connectToDatabase(uri) {
     console.log('✅ MongoDB connected successfully');
     console.log('🧠 Connected to DB name:', dbName);
     console.log('🔍 Using DB:', mongoose.connection.name);
+    
 
     return mongoose.connection;
   } catch (err) {

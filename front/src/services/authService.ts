@@ -16,6 +16,11 @@ export const authService = {
       body: JSON.stringify(payload),
     });
   },
+  async logout(): Promise<{ ok: boolean }> {
+    return http<{ ok: boolean }>(`${AUTH_BASE}/logout`, {
+      method: 'POST',
+    });
+  },
 };
 
 

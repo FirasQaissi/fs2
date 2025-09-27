@@ -58,8 +58,8 @@ export default function LoginForm({ onSuccess }: Props) {
             severity="error" 
             sx={{ 
               borderRadius: '12px',
-              backgroundColor: '#ffebee',
-              color: '#c62828',
+              backgroundColor: '#white',
+              color: 'green',
             }}
           >
             {error}
@@ -69,12 +69,15 @@ export default function LoginForm({ onSuccess }: Props) {
           label="אימייל"
           type="email"
           value={values.email}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: LoginRequest) => ({ ...v, email: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValues((v: LoginRequest) => ({ ...v, email: e.target.value 
+        
+          }))}
           error={!!emailError}
           helperText={emailError}
           required
           fullWidth
           placeholder="example@gmail.com"
+          
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
@@ -88,6 +91,7 @@ export default function LoginForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: emailError ? '#e53935' : '#6c63ff',
               },
+              color: 'black',
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -118,6 +122,8 @@ export default function LoginForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: passwordError ? '#e53935' : '#6c63ff',
               },
+                 color: 'black',
+              
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -163,11 +169,14 @@ export default function LoginForm({ onSuccess }: Props) {
             '&:hover': {
               backgroundColor: '#5a52f0',
               boxShadow: 'none',
+              
             },
             '&:disabled': {
               backgroundColor: '#e0e0e0',
               color: '#9e9e9e',
+              
             },
+            
           }}
         >
           {submitting ? 'מתחבר...' : 'התחברות'}

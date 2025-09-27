@@ -30,7 +30,7 @@ export default function RegisterForm({ onSuccess }: Props) {
   
   const phoneError = useMemo(() => {
     const ISRAELI_PHONE_REGEX = /^05[0-9]{8}$/;
-    return values.phone.length > 0 && !ISRAELI_PHONE_REGEX.test(values.phone)
+    return values.phone && values.phone.length > 0 && !ISRAELI_PHONE_REGEX.test(values.phone)
       ? 'Enter valid Israeli mobile (05XXXXXXXX)'
       : '';
   }, [values.phone]);
@@ -100,6 +100,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: nameError ? '#e53935' : '#6c63ff',
               },
+                   color: 'black',
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -130,6 +131,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: emailError ? '#e53935' : '#6c63ff',
               },
+                   color: 'black',
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -160,6 +162,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: passwordError ? '#e53935' : '#6c63ff',
               },
+                   color: 'black',
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -188,6 +191,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               '&.Mui-focused fieldset': {
                 borderColor: phoneError ? '#e53935' : '#6c63ff',
               },
+              color: 'black',
             },
             '& .MuiInputLabel-root': {
               color: '#6b7280',
@@ -223,14 +227,16 @@ export default function RegisterForm({ onSuccess }: Props) {
           disabled={submitting || !isValid}
           fullWidth
           sx={{
+            
             backgroundColor: '#6c63ff',
-            color: 'white',
+            
             borderRadius: '12px',
             py: 1.5,
             textTransform: 'none',
             fontSize: '1rem',
             fontWeight: 600,
             boxShadow: 'none',
+            
             '&:hover': {
               backgroundColor: '#5a52f0',
               boxShadow: 'none',
@@ -239,6 +245,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               backgroundColor: '#e0e0e0',
               color: '#9e9e9e',
             },
+            
           }}
         >
           {submitting ? 'Creating account…' : 'Register'}

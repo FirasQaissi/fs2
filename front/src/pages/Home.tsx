@@ -88,12 +88,12 @@ export default function Home() {
         email: contactForm.email,
         phone: contactForm.phone,
       };
-      const res = await http<{ ok: boolean; lead: unknown }>(`${API_BASE}/api/leads`, {
+      await http<{ ok: boolean; lead: unknown }>(`${API_BASE}/api/leads`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' },
       });
-      console.log('New lead saved:', res?.lead);
+      // Lead saved successfully
       setContactSubmitted(true);
       setTimeout(() => {
         setContactSubmitted(false);
@@ -209,6 +209,122 @@ const features = [
             backgroundColor: 'text.primary',
           }}
         />
+
+        {/* Product Images Circle Collage */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '8%',
+            left: '3%',
+            width: '280px', // Increased to accommodate larger circle
+            height: '280px', // Increased to accommodate larger circle
+            zIndex: 1,
+            display: { xs: 'none', md: 'block' },
+          }}
+        >
+          {/* Main product images circle */}
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              animation: 'rotate 20s linear infinite',
+              '@keyframes rotate': {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg)' }
+              }
+            }}
+          >
+            {[
+              '/src/images/93098556593.png',
+              '/src/images/661.jpg',
+              '/src/images/771.jpg',
+              '/src/images/s-l1200.jpg',
+              '/src/images/smart_lock_web1.jpg',
+              '/src/images/final.png',
+              '/src/images/1.jpg',
+              '/src/images/2.jpg',
+              '/src/images/3.jpg',
+              '/src/images/AllegionShlageOmnia_SatinNickel_Front_DigitsOn_Final_02.png.thumb.1280.1280_394x.webp',
+              '/src/images/Hd43ab953807844cf9cabc6346c167e89V.avif',
+              '/src/images/Untitled-design-48-1.png'
+            ].map((imgSrc, index) => {
+              const angle = (index * 30) * (Math.PI / 180); // 30 degrees apart for 12 images
+              const radius = 90; // Increased radius for larger circle
+              const x = Math.cos(angle) * radius;
+              const y = Math.sin(angle) * radius;
+              
+              return (
+                <Box
+                  key={index}
+                  component="img"
+                  src={imgSrc}
+                  alt={`Product ${index + 1}`}
+                  sx={{
+                    position: 'absolute',
+                    width: 70, // Increased from 50px
+                    height: 70, // Increased from 50px
+                    borderRadius: '50%',
+                    border: '3px solid',
+                    borderColor: 'primary.main',
+                    objectFit: 'cover',
+                    left: `calc(50% + ${x}px - 35px)`, // Adjusted for new size
+                    top: `calc(50% + ${y}px - 35px)`, // Adjusted for new size
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease-in-out',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                    animation: `float${index} 3s ease-in-out infinite`,
+                    animationDelay: `${index * 0.3}s`, // Faster staggered animation
+                    '&:hover': {
+                      transform: 'scale(1.5)', // Increased hover scale
+                      zIndex: 10,
+                      boxShadow: '0 12px 35px rgba(0, 212, 170, 0.5)',
+                      borderColor: 'secondary.main',
+                      borderWidth: '4px',
+                    },
+                    [`@keyframes float${index}`]: {
+                      '0%, 100%': {
+                        transform: 'translateY(0px) rotate(0deg)',
+                      },
+                      '50%': {
+                        transform: `translateY(-${8 + index * 1.5}px) rotate(${index % 2 === 0 ? 3 : -3}deg)`,
+                      },
+                    },
+                  }}
+                />
+              );
+            })}
+            
+            {/* Center circle with logo */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                bgcolor: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 6px 20px rgba(0, 212, 170, 0.3)',
+                animation: 'centerPulse 2s ease-in-out infinite',
+                '@keyframes centerPulse': {
+                  '0%, 100%': {
+                    transform: 'translate(-50%, -50%) scale(1)',
+                  },
+                  '50%': {
+                    transform: 'translate(-50%, -50%) scale(1.1)',
+                  },
+                },
+              }}
+            >
+              <SecurityIcon sx={{ color: 'white', fontSize: '2rem' }} />
+            </Box>
+          </Box>
+        </Box>
         
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Box sx={{ 

@@ -3,7 +3,7 @@ const { User } = require('../models');
 async function listUsers(_req, res) {
   try {
     const users = await User.find()
-      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry')
+      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry lastLogin isOnline')
       .sort({ createdAt: -1 })
       .lean();
     
@@ -145,7 +145,7 @@ async function updateUser(req, res) {
     const updated = await User.findByIdAndUpdate(
       targetId,
       { $set: update },
-      { new: true, runValidators: true, fields: '_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry' }
+      { new: true, runValidators: true, fields: '_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry lastLogin isOnline' }
     ).lean();
 
     if (!updated) {
@@ -289,7 +289,7 @@ async function createUser(req, res) {
     });
 
     const user = await User.findById(created._id)
-      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry')
+      .select('_id name email phone isAdmin isBusiness isUser createdAt tempAdminExpiry lastLogin isOnline')
       .lean();
 
     return res.status(201).json(user);

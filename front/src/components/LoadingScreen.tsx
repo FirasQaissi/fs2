@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
 
 export default function LoadingScreen() {
@@ -20,7 +20,7 @@ export default function LoadingScreen() {
   return (
     <Box
       sx={{
-        position: ' fixed',
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
@@ -42,22 +42,20 @@ export default function LoadingScreen() {
         src="/src/images/sec (1).gif"
         alt="Loading..."
         sx={{
-          width: isMobile ? '80%' : '400px',
+          width: 'auto',
           height: 'auto',
-          maxWidth: '500px',
-          maxHeight: '500px',
-          objectFit: 'contain',
-          borderRadius: '20px',
-          boxShadow: '0 20px 60px rgba(237, 237, 237, 0.97)',
-          animation: 'pulse 2s ease-in-out infinite',
-          '@keyframes pulse': {
+          maxWidth: isMobile ? '90vw' : '800px',
+          maxHeight: isMobile ? '90vh' : '800px',
+          backgroundColor: 'transparent',
+          animation: 'smoothPulse 2s ease-in-out infinite',
+          '@keyframes smoothPulse': {
             '0%, 100%': {
-              transform: 'scale(1)',
-              filter: 'brightness(1)'
+              transform: 'scale(0.95)',
+              opacity: 0.9
             },
             '50%': {
               transform: 'scale(1.05)',
-              filter: 'brightness(1.1)'
+              opacity: 1
             }
           }
         }}

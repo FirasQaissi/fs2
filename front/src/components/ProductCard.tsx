@@ -86,6 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Card
         sx={{
           height: '100%',
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -93,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+            boxShadow: '0 8px 25px rgba(37, 20, 168, 0.58)',
           },
         }}
         onClick={handleCardClick}
@@ -109,7 +110,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             position: 'absolute',
             top: 8,
             right: 8,
-            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            bgcolor: 'rgba(242, 237, 237, 0.06)',
             backdropFilter: 'blur(4px)',
             zIndex: 1,
             '&:hover': {
@@ -126,7 +127,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <CardMedia
           component="img"
-          height="220"
+          height="320"
           image={product.image}
           alt={product.name}
           sx={{
@@ -142,11 +143,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             component="h2" 
             gutterBottom
             sx={{ 
-              fontWeight: 600,
+              fontWeight: 800,
               fontSize: '1.1rem',
               lineHeight: 1.3,
               mb: 1,
-              fontFamily: '"Poppins", "Inter", sans-serif',
+              fontFamily: '"Poppins", "Inter", cursive',
             }}
           >
             {product.name}
@@ -160,7 +161,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               flexGrow: 1,
               fontSize: '0.875rem',
               lineHeight: 1.4,
-              fontFamily: '"Inter", sans-serif',
+              fontFamily: '"Inter",cursive',
             }}
           >
             {product.descriptions}
@@ -186,7 +187,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   sx={{ 
                     fontSize: '0.7rem',
                     height: '24px',
-                    fontFamily: '"Inter", sans-serif',
+                    fontFamily: '"Inter",cursive',
                   }}
                 />
               ))}
@@ -210,7 +211,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               sx={{ 
                 mb: 2,
                 fontSize: '1.5rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"Poppins", cursive',
               }}
             >
               ${product.price}
@@ -230,11 +231,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               }}
               sx={{
                 py: 1,
-                fontWeight: 600,
+                fontWeight: 900,
                 textTransform: 'none',
                 borderRadius: '8px',
                 fontSize: '0.9rem',
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Inter", cursive',
               }}
             >
               Add to Cart

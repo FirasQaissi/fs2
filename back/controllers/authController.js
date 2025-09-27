@@ -28,6 +28,12 @@ async function login(req, res) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Update user login status
+    await User.findByIdAndUpdate(user._id, {
+      lastLogin: new Date(),
+      isOnline: true
+    });
+
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
     const safeUser = {
@@ -78,7 +84,7 @@ async function register(req, res) {
       isAdmin: created.isAdmin,
       isBusiness: created.isBusiness
     });
-    const token = jwt.sign({ userId: created._id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: created._id }, JWT_SECRET, { expiresIn: '4h' });
     return res.status(201).json({ user: { _id: created._id, name: created.name, email: created.email, phone: created.phone, isAdmin: !!created.isAdmin, isBusiness: !!created.isBusiness, isUser: created.isUser !== false }, token });
   } catch (err) {
     console.error('Register error', err);
@@ -96,11 +102,46 @@ async function me(req, res) {
   }
 }
 
-function logout(_req, res) {
-  // For stateless JWT, logout is handled client-side by discarding the token
-  return res.json({ ok: true });
+async function logout(req, res) {
+  try {
+    // If user is authenticated, mark them as offline
+    if (req.user && req.user.id) {
+      await User.findByIdAndUpdate(req.user.id, {
+        isOnline: false
+      });
+    }
+    // For stateless JWT, logout is handled client-side by discarding the token
+    return res.json({ ok: true });
+  } catch (error) {
+    // Don't fail logout if we can't update status
+    return res.json({ ok: true });
+  }
 }
 
-module.exports = { login, register, me, logout };
+async function verifyPassword(req, res) {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean();
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const isValid = await comparePassword(String(password), user.passwordHash);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Password verification error', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+module.exports = { login, register, me, logout, verifyPassword };
 
 

@@ -3,7 +3,11 @@ import type { User } from '../types/auth';
 
 const ADMIN_BASE = `${API_BASE}/api/admin`;
 
-export type AdminUser = User & { createdAt?: string };
+export type AdminUser = User & { 
+  createdAt?: string;
+  lastLogin?: string;
+  isOnline?: boolean;
+};
 
 export const adminService = {
   async listUsers(): Promise<AdminUser[]> {

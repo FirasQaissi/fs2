@@ -247,6 +247,7 @@ export default function Footer() {
           <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
           <Box component="img" src="/src/images/qaissifiras_qr.png" alt="Smart Gate" sx={{ height: 150, width: 'auto' }} />
        <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
+        
           ❤️ {t('אתר זה נבנה באהבה ע"פ ')} <br />
             © {new Date().getFullYear()} SmartGate. {t('footer.allRightsReserved')}
           </Typography>

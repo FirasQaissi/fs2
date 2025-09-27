@@ -30,7 +30,7 @@ export default function Register() {
             overflow: 'hidden', 
             boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
             border: '3px solid #000',
-            bgcolor: 'white'
+            bgcolor: 'black'
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minHeight: '600px' }}>

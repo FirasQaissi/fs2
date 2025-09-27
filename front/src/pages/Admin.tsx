@@ -31,7 +31,9 @@ import BusinessIcon from '@mui/icons-material/Business';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BlockIcon from '@mui/icons-material/Block';
+import SearchIcon from '@mui/icons-material/Search';
 import Navbar from '../components/Navbar';
+import SecureDeleteDialog from '../components/SecureDeleteDialog';
 import { adminService, type AdminUser } from '../services/adminService';
 import { productService } from '../services/productService';
 import type { Product, ProductCreateRequest } from '../types/product';
@@ -41,10 +43,14 @@ type TabKey = 'users' | 'products';
 export default function Admin() {
   const [tab, setTab] = useState<TabKey>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [productSearchQuery, setProductSearchQuery] = useState('');
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [newProduct, setNewProduct] = useState<ProductCreateRequest>({ name: '', descriptions: '', version: '', features: [], price: 0, image: '' });
   const [featuresInput, setFeaturesInput] = useState('');
@@ -61,12 +67,24 @@ export default function Admin() {
     isUser: true
   });
   const [creatingUser, setCreatingUser] = useState(false);
+  
+  // Secure delete dialog state
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    type: 'user' as 'user' | 'product',
+    id: '',
+    name: '',
+    onConfirm: async () => {}
+  });
 
   useEffect(() => {
     setLoadingUsers(true);
     adminService
       .listUsers()
-      .then(setUsers)
+      .then((users) => {
+        setUsers(users);
+        setFilteredUsers(users);
+      })
       .catch((e) => setSnack({ open: true, message: e.message || 'Failed to load users', severity: 'error' }))
       .finally(() => setLoadingUsers(false));
   }, []);
@@ -75,10 +93,42 @@ export default function Admin() {
     setLoadingProducts(true);
     productService
       .getAllProducts()
-      .then(setProducts)
+      .then((products) => {
+        setProducts(products);
+        setFilteredProducts(products);
+      })
       .catch((e) => setSnack({ open: true, message: e.message || 'Failed to load products', severity: 'error' }))
       .finally(() => setLoadingProducts(false));
   }, []);
+
+  // Filter users based on search query
+  useEffect(() => {
+    if (!userSearchQuery.trim()) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user =>
+        user.name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+        user.phone?.toLowerCase().includes(userSearchQuery.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [userSearchQuery, users]);
+
+  // Filter products based on search query
+  useEffect(() => {
+    if (!productSearchQuery.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name?.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+        product.descriptions?.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+        product.version?.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+        product.features?.some(feature => feature.toLowerCase().includes(productSearchQuery.toLowerCase()))
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [productSearchQuery, products]);
 
   const userColumns: GridColDef[] = useMemo(() => [
       { 
@@ -148,6 +198,74 @@ export default function Admin() {
               return <span style={{ color: 'red' }}>Expired</span>;
             }
             return date.toLocaleString();
+          } catch {
+            return 'Invalid Date';
+          }
+        },
+      },
+      {
+        field: 'isOnline',
+        headerName: 'Status',
+        width: 100,
+        renderCell: (params: { value?: boolean }) => {
+          const isOnline = !!params.value;
+          return (
+            <Chip
+              label={isOnline ? 'Online' : 'Offline'}
+              size="small"
+              sx={{
+                bgcolor: isOnline ? 'success.main' : 'error.main',
+                color: 'white',
+                fontWeight: 600,
+                '&::before': {
+                  content: '""',
+                  display: 'inline-block',
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: 'white',
+                  mr: 0.5,
+                  animation: isOnline ? 'pulse 2s infinite' : 'none',
+                },
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.5 },
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: 'lastLogin',
+        headerName: 'Last Login',
+        flex: 1,
+        renderCell: (params: { value?: string }) => {
+          if (!params.value) return <Typography variant="body2" color="text.secondary">Never</Typography>;
+          try {
+            const date = new Date(params.value);
+            const now = new Date();
+            const diffMs = now.getTime() - date.getTime();
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            let timeAgo;
+            if (diffMins < 1) timeAgo = 'Just now';
+            else if (diffMins < 60) timeAgo = `${diffMins}m ago`;
+            else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
+            else timeAgo = `${diffDays}d ago`;
+            
+            return (
+              <Box>
+                <Typography variant="body2" fontWeight={500}>
+                  {date.toLocaleDateString()}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {timeAgo}
+                </Typography>
+              </Box>
+            );
           } catch {
             return 'Invalid Date';
           }
@@ -301,14 +419,18 @@ export default function Admin() {
               key="delete"
               icon={<DeleteIcon />}
               label="Delete"
-              onClick={async () => {
-                try {
-                  await adminService.deleteUser(id);
-                  setUsers((list) => list.filter((u) => u._id !== id));
-                  setSnack({ open: true, message: 'User deleted', severity: 'success' });
-                } catch (e: unknown) {
-                  setSnack({ open: true, message: (e as Error).message || 'Delete failed', severity: 'error' });
-                }
+              onClick={() => {
+                setDeleteDialog({
+                  open: true,
+                  type: 'user',
+                  id,
+                  name: row.name || row.email || 'Unknown User',
+                  onConfirm: async () => {
+                    await adminService.deleteUser(id);
+                    setUsers((list) => list.filter((u) => u._id !== id));
+                    setFilteredUsers((list) => list.filter((u) => u._id !== id));
+                  }
+                });
               }}
               showInMenu
             />,
@@ -317,7 +439,55 @@ export default function Admin() {
       },
     ], []);
 
-  const productFormValid = newProduct.name && newProduct.descriptions && newProduct.version && newProduct.image && newProduct.price >= 0;
+  // Enhanced product validation
+  const productValidation = useMemo(() => {
+    const errors: { [key: string]: string } = {};
+    
+    if (!newProduct.name.trim()) {
+      errors.name = 'Product name is required';
+    } else if (newProduct.name.trim().length < 3) {
+      errors.name = 'Product name must be at least 3 characters';
+    }
+    
+    if (!newProduct.descriptions.trim()) {
+      errors.descriptions = 'Product description is required';
+    } else if (newProduct.descriptions.trim().length < 10) {
+      errors.descriptions = 'Description must be at least 10 characters';
+    }
+    
+    if (!newProduct.version.trim()) {
+      errors.version = 'Version is required';
+    } else if (!/^\d+\.\d+(\.\d+)?$/.test(newProduct.version.trim())) {
+      errors.version = 'Version must be in format X.Y or X.Y.Z (e.g., 1.0, 1.2.3)';
+    }
+    
+    if (!newProduct.image.trim()) {
+      errors.image = 'Image URL is required';
+    } else {
+      try {
+        new URL(newProduct.image);
+      } catch {
+        errors.image = 'Please enter a valid URL';
+      }
+    }
+    
+    if (newProduct.price < 0) {
+      errors.price = 'Price must be zero or positive';
+    } else if (newProduct.price > 999999) {
+      errors.price = 'Price must be less than $1,000,000';
+    }
+    
+    if (newProduct.features.length === 0) {
+      errors.features = 'At least one feature is required';
+    }
+    
+    return {
+      errors,
+      isValid: Object.keys(errors).length === 0
+    };
+  }, [newProduct]);
+
+  const productFormValid = productValidation.isValid;
 
   const handleAddFeature = () => {
     const parts = featuresInput
@@ -574,6 +744,44 @@ export default function Admin() {
                 </Stack>
               </Paper>
 
+              {/* Search Field for Users */}
+              <Paper elevation={1} sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: 'background.paper' }}>
+                <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Search Users</Typography>
+                <TextField
+                  fullWidth
+                  label="Search by name, email, or phone"
+                  placeholder="Start typing to filter users..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  variant="outlined"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'background.default',
+                      borderRadius: '12px',
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                    ),
+                  }}
+                />
+                {userSearchQuery && (
+                  <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Found {filteredUsers.length} users matching "{userSearchQuery}"
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={() => setUserSearchQuery('')}
+                      sx={{ minWidth: 'auto', px: 1 }}
+                    >
+                      Clear
+                    </Button>
+                  </Box>
+                )}
+              </Paper>
+
               <Box sx={{ mb: 2 }}>
                 <Alert severity="info" sx={{ borderRadius: 2 }}>
                   💡 <strong>Tip:</strong> Double-click any cell in Name, Email, or Phone columns to edit. Phone format: 05XXXXXXXX (leave empty if not available).
@@ -583,7 +791,7 @@ export default function Admin() {
               <DataGrid
                 density="comfortable"
                 autoHeight
-                rows={users.map((u) => ({ id: u._id, ...u }))}
+                rows={filteredUsers.map((u) => ({ id: u._id, ...u }))}
                 columns={userColumns}
                 loading={loadingUsers}
                 disableRowSelectionOnClick
@@ -607,15 +815,7 @@ export default function Admin() {
                 }}
                 processRowUpdate={async (newRow: AdminUser & { id: string }) => {
                   try {
-                    console.log('🔄 Frontend: Updating user:', newRow.id);
-                    console.log('🔄 Frontend: Update data:', {
-                      name: newRow.name,
-                      email: newRow.email,
-                      phone: newRow.phone,
-                      isAdmin: !!newRow.isAdmin,
-                      isBusiness: !!newRow.isBusiness,
-                      isUser: newRow.isUser !== false,
-                    });
+                    // Updating user data
                     
                     const updateData = {
                       name: newRow.name || '',
@@ -627,7 +827,7 @@ export default function Admin() {
                     };
                     
                     const updated = await adminService.updateUser(newRow.id, updateData);
-                    console.log('✅ Frontend: Update successful:', updated);
+                    // Update successful
                     
                     setUsers((list) => list.map((u) => (u._id === newRow.id ? updated : u)));
                     setSnack({ open: true, message: '✅ User updated successfully!', severity: 'success' });
@@ -642,7 +842,7 @@ export default function Admin() {
                       errorMessage = e.message;
                     }
                     
-                    console.log('🔴 Showing error message:', errorMessage);
+                    // Error occurred during update
                     setSnack({ open: true, message: `❌ ${errorMessage}`, severity: 'error' });
                     
                     // Re-throw to prevent DataGrid from updating
@@ -675,6 +875,8 @@ export default function Admin() {
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                       variant="outlined"
                       required
+                      error={!!productValidation.errors.name}
+                      helperText={productValidation.errors.name || 'Enter a descriptive product name'}
                     />
                     <TextField 
                       fullWidth 
@@ -683,6 +885,9 @@ export default function Admin() {
                       onChange={(e) => setNewProduct({ ...newProduct, version: e.target.value })}
                       variant="outlined"
                       required
+                      error={!!productValidation.errors.version}
+                      helperText={productValidation.errors.version || 'e.g., 1.0, 2.1.3'}
+                      placeholder="1.0"
                     />
                   </Stack>
                   
@@ -695,7 +900,8 @@ export default function Admin() {
                     onChange={(e) => setNewProduct({ ...newProduct, descriptions: e.target.value })}
                     variant="outlined"
                     required
-                    helperText="Provide a detailed description of the product"
+                    error={!!productValidation.errors.descriptions}
+                    helperText={productValidation.errors.descriptions || 'Provide a detailed description of the product'}
                   />
                   
                   <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
@@ -707,6 +913,8 @@ export default function Admin() {
                       onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
                       variant="outlined"
                       required
+                      error={!!productValidation.errors.price}
+                      helperText={productValidation.errors.price || 'Enter price in USD'}
                       inputProps={{ min: 0, step: 0.01 }}
                     />
                     <TextField 
@@ -716,7 +924,9 @@ export default function Admin() {
                       onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
                       variant="outlined"
                       required
-                      helperText="Enter the full URL to the product image"
+                      error={!!productValidation.errors.image}
+                      helperText={productValidation.errors.image || 'Enter the full URL to the product image'}
+                      placeholder="https://example.com/image.jpg"
                     />
                   </Stack>
                   
@@ -741,7 +951,7 @@ export default function Admin() {
                       </Button>
                     </Stack>
                     
-                    {(newProduct.features || []).length > 0 && (
+                    {(newProduct.features || []).length > 0 ? (
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                           Product Features:
@@ -757,6 +967,12 @@ export default function Admin() {
                             />
                           ))}
                         </Stack>
+                      </Box>
+                    ) : productValidation.errors.features && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" color="error">
+                          {productValidation.errors.features}
+                        </Typography>
                       </Box>
                     )}
                   </Box>
@@ -804,11 +1020,49 @@ export default function Admin() {
               <Paper elevation={1} sx={{ borderRadius: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
                 <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
                   <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    📦 Product Inventory ({products.length})
+                    📦 Product Inventory ({filteredProducts.length}{productSearchQuery ? ` of ${products.length}` : ''})
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     Manage your existing products, edit details, or remove items
                   </Typography>
+                </Box>
+
+                {/* Search Field for Products */}
+                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+                  <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Search Products</Typography>
+                  <TextField
+                    fullWidth
+                    label="Search by name, description, version, or features"
+                    placeholder="Start typing to filter products..."
+                    value={productSearchQuery}
+                    onChange={(e) => setProductSearchQuery(e.target.value)}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'background.default',
+                        borderRadius: '12px',
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                      ),
+                    }}
+                  />
+                  {productSearchQuery && (
+                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Found {filteredProducts.length} products matching "{productSearchQuery}"
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={() => setProductSearchQuery('')}
+                        sx={{ minWidth: 'auto', px: 1 }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
                 
                 <Box sx={{ mb: 2 }}>
@@ -820,7 +1074,7 @@ export default function Admin() {
                 <DataGrid
                   density="comfortable"
                   autoHeight
-                  rows={products.map((p, index) => ({ 
+                  rows={filteredProducts.map((p, index) => ({ 
                     ...p,
                     id: (p as Product & { _id?: string })._id || p.id || `product-${index}`
                   }))}
@@ -963,16 +1217,18 @@ export default function Admin() {
                             key="delete"
                             icon={<DeleteIcon />}
                             label="Delete Product"
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-                                try {
+                            onClick={() => {
+                              setDeleteDialog({
+                                open: true,
+                                type: 'product',
+                                id,
+                                name: row.name || 'Unknown Product',
+                                onConfirm: async () => {
                                   await productService.deleteProduct(id);
                                   setProducts((list) => list.filter((p) => ((p as Product & { _id?: string })._id || `product-${list.indexOf(p)}`) !== id));
-                                  setSnack({ open: true, message: 'Product deleted successfully!', severity: 'success' });
-                                } catch (e: unknown) {
-                                  setSnack({ open: true, message: (e as Error).message || 'Failed to delete product', severity: 'error' });
+                                  setFilteredProducts((list) => list.filter((p) => ((p as Product & { _id?: string })._id || `product-${list.indexOf(p)}`) !== id));
                                 }
-                              }
+                              });
                             }}
                           />,
                         ];
@@ -1038,6 +1294,16 @@ export default function Admin() {
           {snack.message}
         </Alert>
       </Snackbar>
+
+      {/* Secure Delete Dialog */}
+      <SecureDeleteDialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog(prev => ({ ...prev, open: false }))}
+        onConfirm={deleteDialog.onConfirm}
+        title={`Delete ${deleteDialog.type === 'user' ? 'User' : 'Product'}`}
+        itemName={deleteDialog.name}
+        itemType={deleteDialog.type}
+      />
     </Box>
   );
 }

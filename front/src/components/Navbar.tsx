@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { authStorage } from '../services/authStorage';
+import { authService } from '../services/authService';
 import { useSettings } from '../providers/SettingsProvider';
 import { cartService } from '../services/cartService';
 import { productService } from '../services/productService';
@@ -93,7 +94,13 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
     const loadProducts = async () => {
       try {
         const productsData = await productService.getAllProducts();
-        setProducts(productsData);
+        // Transform products to ensure consistent ID format
+        const transformedProducts = productsData.map(product => ({
+          id: product.id || product._id || '',
+          name: product.name,
+          price: product.price
+        }));
+        setProducts(transformedProducts);
       } catch (error) {
         console.error('Failed to load products for search:', error);
       }
@@ -136,7 +143,15 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
     setUserMenuAnchor(null);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      // Call logout API to update server-side status
+      await authService.logout();
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error('Logout API call failed:', error);
+    }
+    
     authStorage.clear();
     handleUserMenuClose();
     navigate('/');
@@ -146,14 +161,22 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  // RTL order: בית | מוצרים | שירותים | תכונות | אודות
-  const navItems = [
-    { label: t('nav.home'), path: '/', icon: <HomeIcon /> },
-    { label: t('nav.products'), path: '/products', icon: <ProductsIcon /> },
-    { label: t('nav.services'), path: '/services', icon: <ServicesIcon /> },
-    { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
-    { label: t('nav.about'), path: '/about', icon: <AboutIcon /> },
-  ];
+  // Dynamic order based on language - English: Home first, Hebrew/Arabic: maintain RTL order
+  const navItems = lang === 'en' 
+    ? [
+        { label: t('nav.home'), path: '/', icon: <HomeIcon /> },
+        { label: t('nav.products'), path: '/products', icon: <ProductsIcon /> },
+        { label: t('nav.services'), path: '/services', icon: <ServicesIcon /> },
+        { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
+        { label: t('nav.about'), path: '/about', icon: <AboutIcon /> },
+      ]
+    : [
+        { label: t('nav.home'), path: '/', icon: <HomeIcon /> },
+        { label: t('nav.products'), path: '/products', icon: <ProductsIcon /> },
+        { label: t('nav.services'), path: '/services', icon: <ServicesIcon /> },
+        { label: t('nav.features'), path: '/features', icon: <FeaturesIcon /> },
+        { label: t('nav.about'), path: '/about', icon: <AboutIcon /> },
+      ];
 
   const MobileMenu = () => (
     <Drawer
@@ -302,8 +325,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               <ListItemText primary={t('nav.myCard')} sx={{ color: 'inherit' }} />
             </ListItem>
             <ListItem
-              onClick={() => {
-                handleSignOut();
+              onClick={async () => {
+                await handleSignOut();
                 handleMobileMenuToggle();
               }}
               sx={{
@@ -538,7 +561,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps = 
               </Box>
 
               {/* Navigation Links */}
-              <Box sx={{ display: 'flex', gap: 1 }} dir="rtl">
+              <Box sx={{ display: 'flex', gap: 1 }} dir={lang === 'en' ? 'ltr' : 'rtl'}>
                 {navItems.map((item) => (
                   <Button
                     key={item.path}

@@ -23,6 +23,9 @@ const UserSchema = new mongoose.Schema(
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: [] }],
     // Temporary admin privileges
     tempAdminExpiry: { type: Date, default: null },
+    // User activity tracking
+    lastLogin: { type: Date, default: null },
+    isOnline: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 );
