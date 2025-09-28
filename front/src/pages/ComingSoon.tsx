@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Container,
@@ -21,7 +20,7 @@ export default function ComingSoon() {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const { t } = useSettings();
+  useSettings();
 
   // Get page name from path
   const getPageName = (pathname: string) => {

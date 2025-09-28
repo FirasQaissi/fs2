@@ -5,10 +5,10 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Grid,
   IconButton,
   Snackbar
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { 
   FavoriteOutlined as FavoriteIcon,
   Delete as DeleteIcon

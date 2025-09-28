@@ -3,10 +3,15 @@ const nodemailer = require('nodemailer');
 class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'outlook', // Using Outlook service
+      host: 'smtp-mail.outlook.com',
+      port: 587,
+      secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER || 'smartgate.service@outlook.com',
         pass: process.env.EMAIL_PASS || 'your-email-password' // You should set this in your .env file
+      },
+      tls: {
+        ciphers: 'SSLv3'
       }
     });
   }

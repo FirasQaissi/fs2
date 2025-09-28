@@ -1,8 +1,6 @@
-import React from 'react';
 import {
   Box,
   Container,
-  Grid,
   Typography,
   Link,
   IconButton,
@@ -66,9 +64,9 @@ export default function Footer() {
     >
       <Container maxWidth="lg">
         {/* Main Footer Content */}
-        <Grid container spacing={4}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {/* Company Info */}
-          <Grid item xs={12} md={4}>
+            <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Box 
@@ -114,10 +112,10 @@ export default function Footer() {
                 </Box>
               </Stack>
             </Box>
-          </Grid>
+          </Box>
 
           {/* Company Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Box sx={{ flex: '1 1 200px', minWidth: 200 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               {t('footer.company')}
             </Typography>
@@ -141,10 +139,10 @@ export default function Footer() {
                 </Link>
               ))}
             </Stack>
-          </Grid>
+          </Box>
 
           {/* Products Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Box sx={{ flex: '1 1 200px', minWidth: 200 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               {t('footer.products')}
             </Typography>
@@ -168,10 +166,10 @@ export default function Footer() {
                 </Link>
               ))}
             </Stack>
-          </Grid>
+          </Box>
 
           {/* Legal Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Box sx={{ flex: '1 1 200px', minWidth: 200 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               {t('footer.legal')}
             </Typography>
@@ -195,10 +193,10 @@ export default function Footer() {
                 </Link>
               ))}
             </Stack>
-          </Grid>
+          </Box>
 
           {/* Social Media & Newsletter */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Box sx={{ flex: '1 1 200px', minWidth: 200 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               {t('footer.connect')}
             </Typography>
@@ -229,8 +227,8 @@ export default function Footer() {
                 {t('footer.followUs')}
               </Typography>
             </Stack>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         <Divider sx={{ my: 4, borderColor: '#333' }} />
 
@@ -244,16 +242,13 @@ export default function Footer() {
             gap: 2,
           }}
         >
-          <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
-          <Box component="img" src="/src/images/qaissifiras_qr.png" alt="Smart Gate" sx={{ height: 150, width: 'auto' }} />
-       <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem' }}>
-        
-          ❤️ {t('אתר זה נבנה באהבה ע"פ ')} <br />
-            © {new Date().getFullYear()} SmartGate. {t('footer.allRightsReserved')}
-          </Typography>
-
-            
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <Box component="img" src="/src/images/qaissifiras_qr.png" alt="Smart Gate" sx={{ height: 150, width: 'auto' }} />
+            <Typography variant="body2" sx={{ color: '#b0b0b0', fontSize: '0.875rem', textAlign: 'center' }}>
+              ❤️ {t('אתר זה נבנה באהבה ע"פ ')} <br />
+              © {new Date().getFullYear()} SmartGate. {t('footer.allRightsReserved')}
+            </Typography>
+          </Box>
         </Box>
       </Container>
     </Box>

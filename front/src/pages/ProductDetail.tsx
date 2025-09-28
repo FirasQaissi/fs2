@@ -5,7 +5,6 @@ import {
   Container,
   Typography,
   Button,
-  Grid,
   Paper,
   Chip,
   Stack,
@@ -19,6 +18,7 @@ import {
   Breadcrumbs,
   Link,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   ArrowBack as ArrowBackIcon,
   Favorite as FavoriteIcon,

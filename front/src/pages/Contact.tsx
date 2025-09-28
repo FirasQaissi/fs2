@@ -22,7 +22,6 @@ import {
   Facebook as FacebookIcon,
   Instagram as InstagramIcon,
 } from '@mui/icons-material';
-import { useSettings } from '../providers/SettingsProvider';
 import { customerMessageService } from '../services/customerMessageService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -174,7 +173,7 @@ export default function Contact() {
 
           <Grid container spacing={6}>
             {/* Contact Form */}
-            <Grid item xs={12} lg={8}>
+            <Grid item xs={12} md={8}>
               <Fade in timeout={800}>
                 <Paper
                   elevation={8}
@@ -220,7 +219,7 @@ export default function Contact() {
 
                    <Box component="form" onSubmit={handleSubmit} dir="rtl">
                      <Grid container spacing={3}>
-                       <Grid item xs={12} sm={6}>
+                       <Grid item xs={12} sm={6} component="div">
                          <TextField
                            fullWidth
                            label="שם מלא"
@@ -236,7 +235,7 @@ export default function Contact() {
                            }}
                          />
                        </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={12} sm={6} component="div">
                         <TextField
                           fullWidth
                           label="אימייל"
@@ -253,7 +252,7 @@ export default function Contact() {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={12} sm={6} component="div">
                         <TextField
                           fullWidth
                           label="טלפון"
@@ -268,7 +267,7 @@ export default function Contact() {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={12} sm={6} component="div">
                         <TextField
                           fullWidth
                           label="נושא"
@@ -284,7 +283,7 @@ export default function Contact() {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={12} component="div">
                         <TextField
                           fullWidth
                           label="הודעה"
@@ -302,7 +301,7 @@ export default function Contact() {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={12} component="div">
                         <Button
                           type="submit"
                           variant="contained"
@@ -335,7 +334,7 @@ export default function Contact() {
             </Grid>
 
             {/* Contact Info */}
-            <Grid item xs={12} lg={4}>
+            <Grid item xs={12} lg={4} component="div"     >
               <Stack spacing={4}>
                 {/* Contact Information */}
                 <Fade in timeout={1000}>

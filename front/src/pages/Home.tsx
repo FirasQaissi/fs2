@@ -26,11 +26,13 @@ import Footer from '../components/Footer';
 // Removed useSettings to avoid requiring provider when Home is rendered in isolation
 
 import AuthModal from '../components/auth/AuthModal';
+import SmartLockLeadPopup from '../components/SmartLockLeadPopup';
 
 export default function Home() {
   const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [smartLockLeadOpen, setSmartLockLeadOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     fullName: '',
     email: '',
@@ -210,54 +212,36 @@ const features = [
           }}
         />
 
-        {/* Product Images Circle Collage */}
+        {/* Product Images Vertical Line */}
         <Box
           sx={{
             position: 'fixed',
-            top: '30%',
-            right: '87%', // Moved to right side away from text
-            width: '150px', // Increased container size
-            height: '150px', // Increased container size
+            top: '20%',
+            right: '5%',
+            width: '120px',
             zIndex: 1,
             display: { xs: 'none', lg: 'block' }, // Only show on large screens
           }}
         >
-          {/* Main product images circle */}
+          {/* Vertical line of product images */}
           <Box
             sx={{
-              position: 'relative',
-              width: '100%',
-              height: '100%',
-              animation: "",
-              '@keyframes rotate': {
-                '0%': { transform: 'rotate(0deg)' },
-                '100%': { transform: 'rotate(360deg)' }
-              }
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+              alignItems: 'center',
             }}
           >
             {[
               '/src/images/productsImages/AllegionShlageOmnia_SatinNickel_Front_DigitsOn_Final_02.png.thumb.1280.1280_394x.webp',
-
               '/src/images/productsImages/images22-removebg-preview.png',
-              
-              '/src/images/productsImages/s-l1200-removebg-preview.png  ',
-
-
+              '/src/images/productsImages/s-l1200-removebg-preview.png',
               '/src/images/productsImages/smart_lock_web1-removebg-preview.png',
-
               '/src/images/productsImages/Untitled-design-48-1-removebg-preview.png',
-
               '/src/images/productsImages/65.png',
-
               '/src/images/productsImages/Ruveno-Slim-Smart-Fingerprint-Door-Lock-eeb25cc-removebg-preview.png', 
-
               '/src/images/productsImages/64.png'
             ].map((imgSrc, index) => {
-              const angle = (index * 42) * (Math.PI / 220); // 40 degrees apart for 9 images
-              const radius = 130; // Increased radius for bigger circle
-              const x = Math.cos(angle) * radius;
-              const y = Math.sin(angle) * radius;
-              
               return (
                 <Box
                   key={index}
@@ -265,71 +249,30 @@ const features = [
                   src={imgSrc}
                   alt={`Product ${index + 1}`}
                   onClick={() => navigate('/products')}
+                  mb={2}
+                  mt={-3.9} 
                   sx={{
-                    position: 'absolute',
-                    width:100, // Increased size
-                    height: 100, // Increased size
-                    borderRadius: '50%',
-                    border: '1px solid',
-                    borderColor: 'silver',
+                    width: 100,
+                    height: 100,
+                    borderRadius: '12px',
+                    border: '2px solid',
+                  
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
                     objectFit: 'cover',
-                    left: `calc(50% + ${x}px - 42.5px)`, // Adjusted for new size
-                    top: `calc(79% + ${y}px - 42.5px)`, // Adjusted for new size
                     cursor: 'pointer',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: '0 6px 20px rgba(84, 84, 94, 0.72)',
-                    animation: `float${index} 4s ease-in-out infinite`,
-                    animationDelay: `${index * 0.4}s`,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
                     '&:hover': {
-                        
-                      transform: 'translateY(-30px)',
+                      transform: 'translateX(-10px) scale(1.1)',
                       zIndex: 20,
-                      boxShadow: '0 20px 50px rgba(43, 95, 53, 0.34)',
-                      borderColor: 'black',
-                      borderWidth: '2px',
-                      animationPlayState: 'paused', // Pause floating on hover
-                    },
-                    [`@keyframes float${index}`]: {
-                      '0%, 100%': {
-                        transform: 'translateY(0px) rotate(0deg)',
-                      },
-                      '50%': {
-                        transform: `translateY(-${10 + index * 2}px) rotate(${index % 2 === 0 ? 5 : -5}deg)`,
-                      },
+                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)',
+                      borderColor: 'primary.main',
+                      borderWidth: '3px',
                     },
                   }}
                 />
               );
             })}
-            
-            {/* Center circle with logo */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '65%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                bgcolor: 'primary.main',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 6px 20px rgba(39, 232, 13, 0.25)',
-                animation: 'centerPulse 2s ease-in-out infinite',
-                '@keyframes centerPulse': {
-                  '0%, 100%': {
-                    transform: 'translate(-50%, -50%) scale(1)',
-                  },
-                  '50%': {
-                    transform: 'translate(-50%, -50%) scale(1.1)',
-                  },
-                },
-              }}
-            >
-              <SecurityIcon sx={{ color: 'white', fontSize: '2rem' }} />
-            </Box>
           </Box>
         </Box>
         
@@ -346,37 +289,42 @@ const features = [
   fontWeight={900} 
   gutterBottom
   sx={{ 
-    fontSize: { xs: '2.8rem', md: '4rem', lg: '4.5rem' },
+    fontSize: { xs: '2.8rem', md: '4rem', lg: '4.2rem' },
     lineHeight: 1.3,
     mb: 4,
-    background: 'linear-gradient(135deg, rgba(227, 231, 200, 0.9) 0%, rgb(200, 204, 176) 100%)',
+ background: (theme) => theme.palette.mode === 'dark' 
+ ? 'linear-gradient(135deg, rgba(98, 102, 222, 0.73) 0%, rgba(234, 235, 237, 0.95) 100%)'
+ : 'linear-gradient(135deg, rgba(112, 121, 107, 0.9) 0%, rgb(81, 82, 74) 100%)',
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     textAlign: 'center',
-    fontFamily: '"Inter", "Roboto", sans-serif',
+    fontFamily: '"Inter", "Roboto",Assistant',
     textShadow: '1px 4px 20px rgba(45, 46, 35, 0.16)',
     letterSpacing: '-0.02em'
   }}
 >
-  מנעול חכם שמשדרג את 
+ <span style={{ fontFamily: 'Assistant', fontWeight: 900, fontSize: '5.3rem' }}> SMARTLOCK</span><br />
+ הכירו את 
+  המנעול חכם שמשדרג את 
   הדלת ביוקרה ובטכנולוגיה
 </Typography>
 
 
               <Typography 
-                 variant="h5" 
+                 variant="h4" 
                 sx={{ 
-                  mb: 6, 
+                  mb: 1, 
                   opacity: 0.95,
-                  fontWeight: 200,
+                  fontWeight: 600,
                   lineHeight: 1.7,
                   textAlign: 'center',
-                  fontSize: { xs: '1.2rem', md: '1.7rem' },
+                  fontSize: { xs: '1.2rem', md: '1.5rem' },
                   fontFamily: '"Inter", "Roboto", sans-serif',
                   textShadow: '0 2px 10px rgba(0,0,0,0.2)',
                   maxWidth: '600px',
-                  mx: 'auto'
+                  mx: 'auto',
+              
                 }}
               >
                 הדור הבא של אבטחה, עיצוב וחדשנות לנעילה קלה, בטוחה ומתקדמת מכל מקום בעולם.
@@ -417,7 +365,7 @@ const features = [
                   size="large"
                   onClick={() => navigate('/products')}
                   sx={{
-                    background: 'linear-gradient(135deg,rgb(12, 220, 89) 0%,rgb(34, 181, 44) 100%)',
+                    background: 'linear-gradient(135deg,rgb(19, 122, 207) 0%,rgb(79, 112, 66) 100%)',
                     color: 'white',
                     px: 4,
                     py: 1.5,
@@ -426,7 +374,7 @@ const features = [
                     textTransform: 'none',
                     fontSize: '1.1rem',
                     fontWeight: 600,
-                    boxShadow: '0 8px 32px rgba(0, 212, 170, 0.3)',
+                    boxShadow: '0 8px 32px rgba(0, 212, 170, 0.21)',
                     '&:hover': {
                       background: 'linear-gradient(135deg, #00b894 0%, #6b46c1 100%)',
                       transform: 'translateY(-2px)',
@@ -435,7 +383,32 @@ const features = [
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  הזמן עכשיו
+                  כל המוצרים
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => setSmartLockLeadOpen(true)}
+                  sx={{
+                    background: 'linear-gradient(135deg,rgb(39, 115, 48) 0%,rgb(67, 190, 19) 100%)',
+                    color: 'white'  ,
+                    px:4,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    border: '2px solid rgba(17, 69, 7, 0.49)',
+                    textTransform: 'none',
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    boxShadow: '0 8px 32px rgba(44, 192, 14, 0.58)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg,rgb(49, 14, 166) 0%,rgb(31, 9, 61) 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 40px rgba(255, 107, 107, 0.4)',
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  אני גם רוצה מנעול חכם
                 </Button>
               </Box>
             </Box>
@@ -1139,6 +1112,12 @@ const features = [
         open={authModalOpen}
         onClose={closeAuthModal}
         initialMode={authModalMode}
+      />
+
+      {/* Smart Lock Lead Popup */}
+      <SmartLockLeadPopup 
+        open={smartLockLeadOpen}
+        onClose={() => setSmartLockLeadOpen(false)}
       />
     </Box>
   );
